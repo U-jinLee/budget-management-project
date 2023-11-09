@@ -34,4 +34,7 @@ public class Budget extends BaseTimeEntity {
         this.email = email;
     }
 
+    public void updateAmount(Long amount) {
+        this.amount = amount;
+    }
 }
