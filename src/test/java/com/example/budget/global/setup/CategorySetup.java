@@ -11,6 +11,10 @@ public class CategorySetup {
     @Autowired
     CategoryRepository categoryRepository;
 
+    public Category save() {
+        return categoryRepository.save(buildApplicant(0));
+    }
+
     public void save(int index) {
         for (int i = 0; i < index; i++) {
             categoryRepository.save(buildApplicant(i));

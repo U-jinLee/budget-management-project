@@ -17,7 +17,7 @@ class CategoryApiControllerTest extends IntegrationTest {
     CategorySetup categorySetup;
 
     @Test
-    void getCategories() throws Exception {
+    void 카테고리_불러오기_성공() throws Exception {
 
         //given
         categorySetup.save(5);
