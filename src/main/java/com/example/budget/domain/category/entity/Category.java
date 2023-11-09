@@ -1,19 +1,16 @@
 package com.example.budget.domain.category.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
 @ToString
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "category")
 @Entity
 public class Category {
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -21,5 +18,15 @@ public class Category {
 
     @Column(name = "description", nullable = false, length = 100)
     private String description;
+
+    @Column(name = "selected_count", nullable = false)
+    private Integer selectedCount;
+
+    @Builder
+    public Category(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.selectedCount = 0;
+    }
 
 }
