@@ -2,11 +2,11 @@ package com.example.budget.domain.client.entity;
 
 import com.example.budget.domain.client.model.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 @ToString
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "client")
 @Entity
 public class Client {
@@ -23,4 +23,10 @@ public class Client {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Builder
+    public Client(String email, String password) {
+        this.email = email;
+        this.password = password;
+        this.role = Role.USER;
+    }
 }
