@@ -1,4 +1,4 @@
-package com.example.skeleton;
+package com.example.budget;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
 @SpringBootTest
-class SkeletonApplicationTests {
+class BudgetManagementApplicationTests {
 
     @Test
     void contextLoads() {

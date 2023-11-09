@@ -1,9 +1,6 @@
-![logo](https://static.wanted.co.kr/images/events/3178/58ac3248.jpg)
+![logo](src/main/resources/static/img/logo.jpg)
 
-# 프로젝트명
-프로젝트 관련 설명
-
-<br/>
+# Budget management project BankStake
 
 ## Table of Contents
 - [개요](#개요)
@@ -17,41 +14,22 @@
 - [Authors](#authors)
 - [References](#references)
 
-<br/>
-
-
 ## 개요
-이 서비스가 어떠한 배경에서 발견한 문제상황을 해결하기 위해 시작되었는지 및 어떠한 방법으로 해당 문제를 해결하려 하는지 등 ... To use a badge:
-- Via Github
-    1. Press `Ctrl` + `f` on your keyboard, to bring out the search modal.
-    1. Enter the name of the badge you need.
-    1. Copy the appropriate `![Name](link)` element and paste it in your Markdown file (e.g. README.md)
-- You could also visit the live site at [ileriayo.github.io/markdown-badges/](https://ileriayo.github.io/markdown-badges/)
-
-<br/>
-
+**돈 모아서 뭐하겠노? 소고기 사묵겠지.. 당신을 소고기를 지켜줄! BankStake🐮** <br>
+본 서비스는 사용자들이 개인 재무를 관리하고 지출을 추적하는 데 도움을 주는 애플리케이션입니다. 이 앱은 사용자들이 예산을 설정하고 지출을 모니터링하며 재무 목표를 달성하는 데 도움이 됩니다.
 
 ## Skils
-가상환경: ![Static Badge](https://img.shields.io/badge/Conda-green)<br/>
 언어 및 프레임워크: ![Static Badge](https://img.shields.io/badge/JAVA-17-green) ![Static Badge](https://img.shields.io/badge/Spring_boot-REST-green)<br/>
-데이터 베이스: ![Static Badge](https://img.shields.io/badge/Postgresql-9.2.4-blue) <br/>
-배포 : ![Static Badge](https://img.shields.io/badge/Docker-039BC6) ![Static Badge](https://img.shields.io/badge/AWS-EC2-orange) ![Static Badge](https://img.shields.io/badge/Github-Actions-black)  <br/> ETC : ![Static Badge](https://img.shields.io/badge/Celery-black) ![Static Badge](https://img.shields.io/badge/Redis-red)
-
-<br/>
-
+데이터 베이스: ![Static Badge](https://img.shields.io/badge/h2-2.1.214-blue) <br/>
+배포 : ![Static Badge](https://img.shields.io/badge/Docker-039BC6) ![Static Badge](https://img.shields.io/badge/AWS-EC2-orange) <br/>
 
 ## Installation
 
 Install my-project with npm
 
 ```bash
-  # Package 설치
-  npm install my-project
-  cd my-project
-  
-  # 초기 설정 : 데이터 및  스케쥴러 실행
-  npm install my-project
-  cd my-project
+./gradlew bootjar
+./gradlew bootrun
 ```
 
 <br/>
@@ -65,7 +43,7 @@ To run tests, run the following command
   ./gradlew test
 ```
 
-> Coverage ScreenShot ![Static Badge](https://img.shields.io/badge/Test_Passed-20/20-green)
+> ![Static Badge](https://img.shields.io/badge/Test_Passed-20/20-green)
 ![coverage](https://user-images.githubusercontent.com/48683566/56673924-0b84ae00-66b1-11e9-93ac-fb76ff96a5a0.png)
 
 <br/>
@@ -157,7 +135,7 @@ To run tests, run the following command
 
 ## 프로젝트 진행 및 이슈 관리
 
-[![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://bow-hair-db3.notion.site/cdb6eb37500b4580a80252ea3d7c3963?pvs=4)
+[![Notion](https://img.shields.io/badge/Github_project-%23000000.svg?style=for-the-badge&logo=Github&logoColor=white)](https://github.com/users/U-jinLee/projects/1)
 
 <br/>
 

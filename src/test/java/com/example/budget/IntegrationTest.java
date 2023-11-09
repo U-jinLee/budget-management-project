@@ -1,4 +1,4 @@
-package com.example.skeleton;
+package com.example.budget;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @Ignore
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SkeletonApplication.class)
+@SpringBootTest(classes = BudgetManagementApplication.class)
 @AutoConfigureMockMvc
 @Transactional
 public abstract class IntegrationTest {
