@@ -18,7 +18,7 @@ public class ExpenditureSetup {
 
     private Expenditure buildApplicant(Budget budget) {
         return Expenditure.builder()
-                .amount(100000L)
+                .amount(5000L)
                 .description("test description")
                 .budget(budget)
                 .build();

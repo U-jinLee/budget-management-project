@@ -2,8 +2,9 @@ package com.example.budget.domain.expenditure.service;
 
 import com.example.budget.domain.budget.entity.Budget;
 import com.example.budget.domain.budget.repo.BudgetRepository;
-import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
+import com.example.budget.domain.expenditure.entity.Expenditure;
 import com.example.budget.domain.expenditure.exception.BudgetNotFoundException;
+import com.example.budget.domain.expenditure.exception.ExpenditureNotFoundException;
 import com.example.budget.domain.expenditure.repository.ExpenditureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,21 +12,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-public class ExpenditurePostService {
+public class ExpenditureDeleteService {
 
-    private final ExpenditureRepository expenditureRepo;
     private final BudgetRepository budgetRepo;
+    private final ExpenditureRepository expenditureRepo;
 
     @Transactional
-    public ExpenditurePostDto.Response post(long budgetId, ExpenditurePostDto.Request request) {
+    public void delete(long budgetId, long expenditureId) {
+        Expenditure expenditure = expenditureRepo.findById(expenditureId)
+                .orElseThrow(ExpenditureNotFoundException::new);
 
-        Budget budget = budgetRepo.findById(budgetId)
+        Budget budget = budgetRepo
+                .findById(budgetId)
                 .orElseThrow(BudgetNotFoundException::new);
 
-        // 사용 예산 증가
-        budget.plusAmountUsed(request.getAmount());
+        budget.minusAmountUsed(expenditure.getAmount());
 
-        return ExpenditurePostDto.Response.from(expenditureRepo.save(request.toEntity(budget)));
+        expenditureRepo.delete(expenditure);
     }
 
 }

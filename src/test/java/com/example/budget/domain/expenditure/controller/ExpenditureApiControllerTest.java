@@ -17,8 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,7 +41,7 @@ class ExpenditureApiControllerTest extends IntegrationTest {
         Client client = clientSetup.save();
         Budget budget = budgetSetup.save(category.getName(), client.getEmail());
 
-        ExpenditurePostDto.Request request = ExpenditurePostDto.Request.from(100000L, "test");
+        ExpenditurePostDto.Request request = ExpenditurePostDto.Request.from(5000L, "test");
 
         //when
         mvc.perform(post("/api/budgets/{budgetId}/expenditures", budget.getId())
@@ -90,7 +89,18 @@ class ExpenditureApiControllerTest extends IntegrationTest {
     }
 
     @Test
-    void deleteExpenditure() {
+    void 지출_삭제_성공() throws Exception {
+        //given
+        Category category = categorySetup.save();
+        Client client = clientSetup.save();
+        Budget budget = budgetSetup.save(category.getName(), client.getEmail());
+        Expenditure expenditure = expenditureSetup.save(budget);
+        //when
+        mvc.perform(delete("/api/budgets/{budgetId}/expenditures/{id}", budget.getId(), expenditure.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                //then
+                .andExpect(status().isNoContent());
     }
 
     @Test
