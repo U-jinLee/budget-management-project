@@ -35,4 +35,10 @@ public class Expenditure extends BaseTimeEntity {
         this.isContain = IsContain.CONTAIN;
         this.budget = budget;
     }
+
+    public void changeContainStatus() {
+        if(this.isContain.equals(IsContain.CONTAIN))
+            this.isContain = IsContain.NOT_CONTAIN;
+    }
+
 }

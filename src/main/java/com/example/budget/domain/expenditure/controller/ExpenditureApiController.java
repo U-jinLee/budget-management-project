@@ -5,6 +5,7 @@ import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
 import com.example.budget.domain.expenditure.service.ExpenditureDeleteService;
 import com.example.budget.domain.expenditure.service.ExpenditurePostService;
 import com.example.budget.domain.expenditure.service.ExpenditureQueryService;
+import com.example.budget.domain.expenditure.service.ExpenditureUpdateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ public class ExpenditureApiController {
     private final ExpenditurePostService expenditurePostService;
     private final ExpenditureQueryService expenditureQueryService;
     private final ExpenditureDeleteService expenditureDeleteService;
+    private final ExpenditureUpdateService expenditureUpdateService;
 
     /**
      * 지출 등록
@@ -64,9 +66,14 @@ public class ExpenditureApiController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * 지출 합계 여부 변경
+     *
+     * @throws com.example.budget.domain.expenditure.exception.ExpenditureNotFoundException 해당하는 지출이 존재하지 않으면 생기는 오류
+     */
     @PatchMapping("/{id}/exclude-total")
-    public ResponseEntity<Object> excludeTotalExpenditure(@PathVariable("budgetId") long budgetId,
-                                                          @PathVariable("id") long id) {
+    public ResponseEntity<Object> excludeTotalExpenditure(@PathVariable("id") long id) {
+        expenditureUpdateService.changeContainStatus(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

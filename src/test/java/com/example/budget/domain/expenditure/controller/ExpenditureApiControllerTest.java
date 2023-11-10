@@ -8,6 +8,7 @@ import com.example.budget.domain.client.entity.Client;
 import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
 import com.example.budget.domain.expenditure.entity.Expenditure;
 import com.example.budget.domain.expenditure.model.IsContain;
+import com.example.budget.domain.expenditure.repository.ExpenditureRepository;
 import com.example.budget.global.setup.BudgetSetup;
 import com.example.budget.global.setup.CategorySetup;
 import com.example.budget.global.setup.ClientSetup;
@@ -15,6 +16,8 @@ import com.example.budget.global.setup.ExpenditureSetup;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -30,10 +33,12 @@ class ExpenditureApiControllerTest extends IntegrationTest {
     @Autowired
     BudgetSetup budgetSetup;
     @Autowired
-    BudgetRepository budgetRepo;
-    @Autowired
     ExpenditureSetup expenditureSetup;
 
+    @Autowired
+    BudgetRepository budgetRepo;
+    @Autowired
+    ExpenditureRepository expenditureRepo;
     @Test
     void 지출_넣기_성공() throws Exception {
         //given
@@ -104,6 +109,20 @@ class ExpenditureApiControllerTest extends IntegrationTest {
     }
 
     @Test
-    void excludeTotalExpenditure() {
+    void 지출_합산_제외_성공() throws Exception {
+        //given
+        Category category = categorySetup.save();
+        Client client = clientSetup.save();
+        Budget budget = budgetSetup.save(category.getName(), client.getEmail());
+        Expenditure expenditure = expenditureSetup.save(budget);
+        //when
+        mvc.perform(patch("/api/budgets/{budgetId}/expenditures/{id}/exclude-total", budget.getId(), expenditure.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                //then
+                .andExpect(status().isNoContent());
+
+        Expenditure changedExpenditure = expenditureRepo.findById(expenditure.getId()).get();
+        assertEquals(IsContain.NOT_CONTAIN, changedExpenditure.getIsContain());
     }
 }
