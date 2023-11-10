@@ -1,7 +1,9 @@
 package com.example.budget.domain.expenditure.controller;
 
+import com.example.budget.domain.expenditure.dto.ExpenditureGetDto;
 import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
 import com.example.budget.domain.expenditure.service.ExpenditurePostService;
+import com.example.budget.domain.expenditure.service.ExpenditureQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ExpenditureApiController {
 
     private final ExpenditurePostService expenditurePostService;
+    private final ExpenditureQueryService expenditureQueryService;
 
     /**
      * 지출 등록
@@ -37,9 +40,8 @@ public class ExpenditureApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getExpenditure(@PathVariable("budgetId") Long budgetId,
-                                                 @PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<ExpenditureGetDto.Response> getExpenditure(@PathVariable("id") Long expenditureId) {
+        return ResponseEntity.status(HttpStatus.OK).body(expenditureQueryService.getExpenditure(expenditureId));
     }
 
     @DeleteMapping("/{id}")
