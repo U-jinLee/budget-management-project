@@ -204,21 +204,10 @@ To run tests, run the following command
 </details>
 
 (또는 블로그, 노션 등 링크 연동)
-
-- [Django ORM 조회 시 발생하는 00 버그 발생](#google.com)
-- [00 서비스 개발 회고록](#google.com)
-
-<br/>
-
-
-## Authors
-
-- [@user1](https://www.github.com/2)
-- [@user2](https://www.github.com/2)
-- [@user3](https://www.github.com/2)
+- [LocalDateTime을 통해 이번 달의 기간을 뽑는 코드]()
+- [Class의 RequestParam은 Method의 @PathVariable에 커버가 된다]()
 
 <br/>
-
 
 ## References
 

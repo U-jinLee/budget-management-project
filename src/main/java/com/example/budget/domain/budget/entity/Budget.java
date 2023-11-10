@@ -37,4 +37,9 @@ public class Budget extends BaseTimeEntity {
     public void updateAmount(Long amount) {
         this.amount = amount;
     }
+
+    public void plusAmountUsed(Long amount) {
+        this.amountUsed += amount;
+    }
+
 }

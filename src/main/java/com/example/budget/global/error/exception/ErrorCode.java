@@ -17,7 +17,10 @@ public enum ErrorCode {
     HANDLE_ACCESS_DENIED(403, "C006", "Access is Denied"),
 
     // Budget
-    BUDGET_ALREADY_EXISTS(400, "bdg001", "해당하는 예산 설정이 이미 존재합니다");
+    BUDGET_ALREADY_EXISTS(400, "BDG001", "해당하는 예산 설정이 이미 존재합니다"),
+    INVALID_REQUEST_BUDGET_FIELDS(400, "BDG002", "예산 설정 요청 필드가 유효하지 않습니다"),
+    // Expenditure
+    BUDGET_NOT_EXISTS(400, "EX001", "이번 달에 해당하는 예산이 존재하지 않습니다");
 
     private final String code;
     private final String message;
