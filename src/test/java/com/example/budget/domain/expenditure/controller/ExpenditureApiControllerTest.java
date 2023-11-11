@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -89,7 +91,41 @@ class ExpenditureApiControllerTest extends IntegrationTest {
     }
 
     @Test
-    void getExpenditures() {
+    void 지출_가져오기_성공() throws Exception {
+        //given
+        Category category = categorySetup.save();
+        Client client = clientSetup.save();
+        Budget budget = budgetSetup.save(category.getName(), client.getEmail());
+        expenditureSetup.save(budget);
+
+        //when
+        mvc.perform(get("/api/budgets/{budgetId}/expenditures", budget.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                //then
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void 지출_카테고리_가져오기_성공() throws Exception {
+        //given
+        List<Category> categories = categorySetup.save(2);
+
+        Client client = clientSetup.save();
+        Budget budget = budgetSetup.save(categories.get(0).getName(), client.getEmail());
+        Budget secondBudget = budgetSetup.save(categories.get(1).getName(), client.getEmail());
+
+        expenditureSetup.save(budget);
+        expenditureSetup.save(secondBudget);
+
+        //when
+        mvc.perform(get("/api/budgets/{budgetId}/expenditures", budget.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("category", categories.get(0).getName()))
+                .andDo(print())
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 
     @Test

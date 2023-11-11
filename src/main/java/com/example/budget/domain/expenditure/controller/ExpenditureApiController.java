@@ -3,6 +3,8 @@ package com.example.budget.domain.expenditure.controller;
 import com.example.budget.domain.expenditure.dto.ExpenditureGetDto;
 import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
 import com.example.budget.domain.expenditure.dto.ExpenditurePutDto;
+import com.example.budget.domain.expenditure.dto.ExpenditureSearchCondition;
+import com.example.budget.domain.expenditure.entity.Expenditure;
 import com.example.budget.domain.expenditure.service.ExpenditureDeleteService;
 import com.example.budget.domain.expenditure.service.ExpenditurePostService;
 import com.example.budget.domain.expenditure.service.ExpenditureQueryService;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/budgets/{budgetId}/expenditures")
@@ -48,9 +52,13 @@ public class ExpenditureApiController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * 지출 조회
+     *
+     */
     @GetMapping
-    public ResponseEntity<Object> getExpenditures(@PathVariable("budgetId") long budgetId) {
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<List<Expenditure>> getExpenditures(ExpenditureSearchCondition condition) {
+        return ResponseEntity.status(HttpStatus.OK).body(expenditureQueryService.getExpenditures(condition));
     }
 
     /**

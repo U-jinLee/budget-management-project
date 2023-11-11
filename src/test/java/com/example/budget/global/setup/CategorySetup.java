@@ -5,6 +5,9 @@ import com.example.budget.domain.category.repo.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class CategorySetup {
 
@@ -15,10 +18,12 @@ public class CategorySetup {
         return categoryRepository.save(buildApplicant(0));
     }
 
-    public void save(int index) {
+    public List<Category> save(int index) {
+        List<Category> categories = new ArrayList<>();
         for (int i = 0; i < index; i++) {
-            categoryRepository.save(buildApplicant(i));
+            categories.add(categoryRepository.save(buildApplicant(i)));
         }
+        return categories;
     }
 
     private Category buildApplicant(int index) {

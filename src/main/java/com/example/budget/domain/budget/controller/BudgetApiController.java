@@ -1,7 +1,9 @@
 package com.example.budget.domain.budget.controller;
 
+import com.example.budget.domain.budget.dto.BudgetDesignDto;
 import com.example.budget.domain.budget.dto.BudgetPatchDto;
 import com.example.budget.domain.budget.dto.BudgetPostDto;
+import com.example.budget.domain.budget.service.BudgetDesignService;
 import com.example.budget.domain.budget.service.BudgetPatchService;
 import com.example.budget.domain.budget.service.BudgetPostService;
 import jakarta.validation.Valid;
@@ -17,6 +19,7 @@ public class BudgetApiController {
 
     private final BudgetPostService budgetPostService;
     private final BudgetPatchService budgetPatchService;
+    private final BudgetDesignService budgetDesignService;
 
     /**
      * 이번 달 예산 등록
@@ -34,6 +37,11 @@ public class BudgetApiController {
                                                     @RequestBody @Valid BudgetPatchDto.Request request) {
         budgetPatchService.patchAmount(id, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping("/design")
+    public ResponseEntity<Object> designBudget(@RequestBody @Valid BudgetDesignDto.Request request) {
+        return ResponseEntity.status(HttpStatus.OK).body(budgetDesignService.designBudget(request));
     }
 
 }
