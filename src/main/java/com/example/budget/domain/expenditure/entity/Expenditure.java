@@ -1,6 +1,7 @@
 package com.example.budget.domain.expenditure.entity;
 
 import com.example.budget.domain.budget.entity.Budget;
+import com.example.budget.domain.expenditure.dto.ExpenditurePutDto;
 import com.example.budget.domain.expenditure.model.IsContain;
 import com.example.budget.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -39,6 +40,11 @@ public class Expenditure extends BaseTimeEntity {
     public void changeContainStatus() {
         if(this.isContain.equals(IsContain.CONTAIN))
             this.isContain = IsContain.NOT_CONTAIN;
+    }
+
+    public void updateTo(ExpenditurePutDto.Request request) {
+        this.amount = request.getAmount() == null ? this.amount : request.getAmount();
+        this.description = request.getDescription() == null ? this.description : request.getDescription();
     }
 
 }

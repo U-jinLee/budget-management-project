@@ -6,6 +6,7 @@ import com.example.budget.domain.budget.repo.BudgetRepository;
 import com.example.budget.domain.category.entity.Category;
 import com.example.budget.domain.client.entity.Client;
 import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
+import com.example.budget.domain.expenditure.dto.ExpenditurePutDto;
 import com.example.budget.domain.expenditure.entity.Expenditure;
 import com.example.budget.domain.expenditure.model.IsContain;
 import com.example.budget.domain.expenditure.repository.ExpenditureRepository;
@@ -13,11 +14,10 @@ import com.example.budget.global.setup.BudgetSetup;
 import com.example.budget.global.setup.CategorySetup;
 import com.example.budget.global.setup.ClientSetup;
 import com.example.budget.global.setup.ExpenditureSetup;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -39,6 +39,7 @@ class ExpenditureApiControllerTest extends IntegrationTest {
     BudgetRepository budgetRepo;
     @Autowired
     ExpenditureRepository expenditureRepo;
+
     @Test
     void 지출_넣기_성공() throws Exception {
         //given
@@ -66,7 +67,25 @@ class ExpenditureApiControllerTest extends IntegrationTest {
     }
 
     @Test
-    void putExpenditure() {
+    void 지출_내역_수정_성공() throws Exception {
+        //given
+        Category category = categorySetup.save();
+        Client client = clientSetup.save();
+        Budget budget = budgetSetup.save(category.getName(), client.getEmail());
+        Expenditure expenditure = expenditureSetup.save(budget);
+
+        ExpenditurePutDto.Request request = ExpenditurePutDto.Request.from(15000L, "changed test");
+
+        mvc.perform(put("/api/budgets/{budgetId}/expenditures/{id}", budget.getId(), expenditure.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+        Budget changedBudget = budgetRepo.findById(budget.getId()).get();
+        Expenditure changedExpenditure = expenditureRepo.findById(expenditure.getId()).get();
+
+        Assertions.assertEquals(15000L, changedExpenditure.getAmount());
+        Assertions.assertEquals(10000L, changedBudget.getAmountUsed());
     }
 
     @Test

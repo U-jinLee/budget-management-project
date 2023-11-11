@@ -2,6 +2,7 @@ package com.example.budget.domain.expenditure.controller;
 
 import com.example.budget.domain.expenditure.dto.ExpenditureGetDto;
 import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
+import com.example.budget.domain.expenditure.dto.ExpenditurePutDto;
 import com.example.budget.domain.expenditure.service.ExpenditureDeleteService;
 import com.example.budget.domain.expenditure.service.ExpenditurePostService;
 import com.example.budget.domain.expenditure.service.ExpenditureQueryService;
@@ -33,13 +34,22 @@ public class ExpenditureApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(expenditurePostService.post(budgetId, request));
     }
 
-    @PutMapping
-    public ResponseEntity<Object> putExpenditure(@PathVariable("budgetId") Long budgetId) {
+    /**
+     * 지출 수정
+     *
+     * @throws com.example.budget.domain.expenditure.exception.BudgetNotFoundException      해당하는 예산이 존재하지 않으면 생기는 오류
+     * @throws com.example.budget.domain.expenditure.exception.ExpenditureNotFoundException 해당하는 지출이 존재하지 않으면 생기는 오류
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> putExpenditure(@PathVariable("budgetId") long budgetId,
+                                                 @PathVariable("id") long expenditureId,
+                                                 @RequestBody ExpenditurePutDto.Request request) {
+        expenditureUpdateService.putExpenditure(budgetId, expenditureId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping
-    public ResponseEntity<Object> getExpenditures(@PathVariable("budgetId") Long budgetId) {
+    public ResponseEntity<Object> getExpenditures(@PathVariable("budgetId") long budgetId) {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -60,7 +70,7 @@ public class ExpenditureApiController {
      * @throws com.example.budget.domain.expenditure.exception.BudgetNotFoundException      해당하는 예산이 존재하지 않으면 생기는 오류
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteExpenditure(@PathVariable("budgetId") Long budgetId,
+    public ResponseEntity<Object> deleteExpenditure(@PathVariable("budgetId") long budgetId,
                                                     @PathVariable("id") Long id) {
         expenditureDeleteService.delete(budgetId, id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
