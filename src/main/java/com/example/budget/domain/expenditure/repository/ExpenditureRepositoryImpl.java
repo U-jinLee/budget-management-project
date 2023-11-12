@@ -1,5 +1,6 @@
 package com.example.budget.domain.expenditure.repository;
 
+import com.example.budget.domain.expenditure.dto.BetweenDateVo;
 import com.example.budget.domain.expenditure.dto.ExpenditureSearchCondition;
 import com.example.budget.domain.expenditure.entity.Expenditure;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -19,12 +20,17 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
 
 
     @Override
-    public List<Expenditure> findExpendituresBy(ExpenditureSearchCondition condition) {
+    public List<Expenditure> findExpendituresBy(BetweenDateVo dateVo, ExpenditureSearchCondition condition) {
         return queryFactory.select(expenditure)
                 .from(expenditure)
                 .innerJoin(budget).on(expenditure.budget.eq(budget))
                 .where(categoryEq(condition.getCategory()))
+                .where(createdTimeBetween(dateVo))
                 .fetch();
+    }
+
+    private BooleanExpression createdTimeBetween(BetweenDateVo dateVo) {
+        return expenditure.createdTime.between(dateVo.getStartDate(), dateVo.getEndDate());
     }
 
     private BooleanExpression categoryEq(String category) {

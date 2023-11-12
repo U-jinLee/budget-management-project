@@ -1,5 +1,6 @@
 package com.example.budget.domain.expenditure.service;
 
+import com.example.budget.domain.expenditure.dto.BetweenDateVo;
 import com.example.budget.domain.expenditure.dto.ExpenditureGetDto;
 import com.example.budget.domain.expenditure.dto.ExpenditureSearchCondition;
 import com.example.budget.domain.expenditure.entity.Expenditure;
@@ -23,8 +24,8 @@ public class ExpenditureQueryService {
                 .orElseThrow(ExpenditureNotFoundException::new));
     }
 
-    public List<Expenditure> getExpenditures(ExpenditureSearchCondition condition) {
-        return expenditureRepo.findExpendituresBy(condition);
+    public List<Expenditure> getExpenditures(BetweenDateVo dateVo, ExpenditureSearchCondition condition) {
+        return expenditureRepo.findExpendituresBy(dateVo, condition);
     }
 
 }

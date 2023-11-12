@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -98,9 +99,14 @@ class ExpenditureApiControllerTest extends IntegrationTest {
         Budget budget = budgetSetup.save(category.getName(), client.getEmail());
         expenditureSetup.save(budget);
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime afterSevenDay = now.plusDays(7);
+
         //when
         mvc.perform(get("/api/budgets/{budgetId}/expenditures", budget.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("start-date", now.toString())
+                        .param("end-date", afterSevenDay.toString()))
                 .andDo(print())
                 //then
                 .andExpect(status().isOk());
@@ -118,9 +124,14 @@ class ExpenditureApiControllerTest extends IntegrationTest {
         expenditureSetup.save(budget);
         expenditureSetup.save(secondBudget);
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime afterSevenDay = now.plusDays(7);
+
         //when
         mvc.perform(get("/api/budgets/{budgetId}/expenditures", budget.getId())
                         .contentType(MediaType.APPLICATION_JSON)
+                        .param("start-date", now.toString())
+                        .param("end-date", afterSevenDay.toString())
                         .param("category", categories.get(0).getName()))
                 .andDo(print())
                 //then

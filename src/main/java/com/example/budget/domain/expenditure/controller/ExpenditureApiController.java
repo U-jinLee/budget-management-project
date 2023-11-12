@@ -1,9 +1,6 @@
 package com.example.budget.domain.expenditure.controller;
 
-import com.example.budget.domain.expenditure.dto.ExpenditureGetDto;
-import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
-import com.example.budget.domain.expenditure.dto.ExpenditurePutDto;
-import com.example.budget.domain.expenditure.dto.ExpenditureSearchCondition;
+import com.example.budget.domain.expenditure.dto.*;
 import com.example.budget.domain.expenditure.entity.Expenditure;
 import com.example.budget.domain.expenditure.service.ExpenditureDeleteService;
 import com.example.budget.domain.expenditure.service.ExpenditurePostService;
@@ -15,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -54,11 +52,20 @@ public class ExpenditureApiController {
 
     /**
      * 지출 조회
-     *
      */
     @GetMapping
-    public ResponseEntity<List<Expenditure>> getExpenditures(ExpenditureSearchCondition condition) {
-        return ResponseEntity.status(HttpStatus.OK).body(expenditureQueryService.getExpenditures(condition));
+    public ResponseEntity<List<Expenditure>> getExpenditures(
+            @RequestParam(value = "start-date") LocalDateTime startDate,
+            @RequestParam(value = "end-date") LocalDateTime endDate,
+            ExpenditureSearchCondition condition) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                expenditureQueryService.getExpenditures(
+                        BetweenDateVo.from(startDate, endDate),
+                        condition
+                )
+        );
+
     }
 
     /**
