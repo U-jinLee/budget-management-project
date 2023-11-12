@@ -39,9 +39,9 @@ public class BudgetApiController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PostMapping("/design")
-    public ResponseEntity<Object> designBudget(@RequestBody @Valid BudgetDesignDto.Request request) {
-        return ResponseEntity.status(HttpStatus.OK).body(budgetDesignService.designBudget(request));
+    @GetMapping("/design")
+    public ResponseEntity<Object> designBudget(@RequestParam("amount") long amount) {
+        return ResponseEntity.status(HttpStatus.OK).body(budgetDesignService.designBudget(amount));
     }
 
 }

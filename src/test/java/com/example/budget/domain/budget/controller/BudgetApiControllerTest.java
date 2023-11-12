@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class BudgetApiControllerTest extends IntegrationTest {
@@ -84,4 +86,33 @@ class BudgetApiControllerTest extends IntegrationTest {
         Long changeBudget = budgetRepo.findById(budget.getId()).get().getAmount();
         assertEquals(changeAmount, changeBudget);
     }
+
+    @Test
+    void 예산_설계_성공() throws Exception {
+        //given
+        Client client = clientSetup.save();
+
+        Category category1 = categorySetup.save("주식");
+        Category category2 = categorySetup.save("식비");
+        Category category3 = categorySetup.save("친구비");
+        Category category4 = categorySetup.save("가족비");
+        Category category5 = categorySetup.save("선배비");
+
+        budgetSetup.save(500000L, 275000L, category1.getName(), client.getEmail());
+        budgetSetup.save(300000L, 150000L, category2.getName(), client.getEmail());
+        budgetSetup.save(300000L, 150000L, category3.getName(), client.getEmail());
+        budgetSetup.save(110000L, 150000L, category4.getName(), client.getEmail());
+        budgetSetup.save(90000L, 150000L, category5.getName(), client.getEmail());
+
+
+        mvc.perform(get("/api/budgets/design")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("amount", "1320000")
+                )
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalAmount").exists());
+    }
+
 }
