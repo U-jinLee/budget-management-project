@@ -1,4 +1,4 @@
-package com.example.budget.domain.client.repo;
+package com.example.budget.domain.client.repository;
 
 import com.example.budget.domain.client.entity.Client;
 import org.springframework.data.jpa.repository.JpaRepository;

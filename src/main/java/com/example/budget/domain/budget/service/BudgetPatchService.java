@@ -1,7 +1,7 @@
 package com.example.budget.domain.budget.service;
 
 import com.example.budget.domain.budget.dto.BudgetPatchDto;
-import com.example.budget.domain.budget.repo.BudgetRepository;
+import com.example.budget.domain.budget.repository.BudgetRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

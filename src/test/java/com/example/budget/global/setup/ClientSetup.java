@@ -1,9 +1,7 @@
 package com.example.budget.global.setup;
 
-import com.example.budget.domain.category.entity.Category;
-import com.example.budget.domain.category.repo.CategoryRepository;
 import com.example.budget.domain.client.entity.Client;
-import com.example.budget.domain.client.repo.ClientRepository;
+import com.example.budget.domain.client.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

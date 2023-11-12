@@ -1,4 +1,4 @@
-package com.example.budget.domain.budget.repo;
+package com.example.budget.domain.budget.repository;
 
 import com.example.budget.domain.budget.entity.Budget;
 import org.springframework.data.jpa.repository.JpaRepository;
