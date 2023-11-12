@@ -18,6 +18,11 @@ public class CategorySetup {
         return categoryRepository.save(buildApplicant(0));
     }
 
+    public Category save(String name) {
+        return categoryRepository.save(buildApplicant(name));
+    }
+
+
     public List<Category> save(int index) {
         List<Category> categories = new ArrayList<>();
         for (int i = 0; i < index; i++) {
@@ -33,4 +38,10 @@ public class CategorySetup {
                 .build();
     }
 
+    private Category buildApplicant(String name) {
+        return Category.builder()
+                .name(name)
+                .description("Test description")
+                .build();
+    }
 }
