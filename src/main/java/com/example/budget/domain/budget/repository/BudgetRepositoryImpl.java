@@ -1,5 +1,6 @@
 package com.example.budget.domain.budget.repository;
 
+import com.example.budget.domain.budget.dto.BudgetCategoryAmountVo;
 import com.example.budget.domain.client.dto.CategoryTotalAmountVo;
 import com.example.budget.global.util.TimeUtil;
 import com.querydsl.core.types.Projections;
@@ -29,6 +30,29 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
                 ).fetchOne();
 
         return Optional.of(result);
+    }
+
+    @Override
+    public Optional<Long> findTodayTotalAmount() {
+
+        Long result = queryFactory.select(budget.amount.sum())
+                .from(budget)
+                .fetchOne();
+
+        return Optional.of(result);
+    }
+
+    @Override
+    public List<BudgetCategoryAmountVo> findCategoryAmount() {
+        return queryFactory.select(
+                        Projections.constructor(
+                                BudgetCategoryAmountVo.class,
+                                budget.category,
+                                budget.amount.sum()
+                        ))
+                .from(budget)
+                .groupBy(budget.category)
+                .fetch();
     }
 
     @Override
