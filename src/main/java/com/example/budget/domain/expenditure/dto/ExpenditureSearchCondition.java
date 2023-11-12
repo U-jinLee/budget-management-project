@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExpenditureSearchCondition {
     private String category;
-    private int min;
-    private int max;
+    private Integer min;
+    private Integer max;
 }

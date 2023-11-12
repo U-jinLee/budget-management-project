@@ -3,6 +3,7 @@ package com.example.budget.domain.expenditure.repository;
 import com.example.budget.domain.expenditure.dto.BetweenDateVo;
 import com.example.budget.domain.expenditure.dto.ExpenditureSearchCondition;
 import com.example.budget.domain.expenditure.entity.Expenditure;
+import com.example.budget.domain.expenditure.exception.MinIsBiggetThanMaxException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,7 +27,15 @@ public class ExpenditureRepositoryImpl implements ExpenditureRepositoryCustom {
                 .innerJoin(budget).on(expenditure.budget.eq(budget))
                 .where(categoryEq(condition.getCategory()))
                 .where(createdTimeBetween(dateVo))
+                .where(amountBetween(condition.getMin(), condition.getMax()))
                 .fetch();
+    }
+
+    private BooleanExpression amountBetween(Integer min, Integer max) {
+        if(min == null || max == null) return null;
+        if(min > max) throw new MinIsBiggetThanMaxException();
+
+        return expenditure.amount.between(min, max);
     }
 
     private BooleanExpression createdTimeBetween(BetweenDateVo dateVo) {

@@ -22,7 +22,8 @@ public enum ErrorCode {
     // Expenditure
     BUDGET_NOT_EXISTS(400, "EX001", "이번 달에 해당하는 예산이 존재하지 않습니다"),
     EXPENDITURE_NOT_FOUND(400, "EX002", "해당하는 지출 내역이 존재하지 않습니다"),
-    START_DATE_IS_BEFORE_END_DATE(400, "EX003", "시작 날짜가 종료 날짜보다 빠릅니다");
+    START_DATE_IS_BEFORE_END_DATE(400, "EX003", "시작 날짜가 종료 날짜보다 빠릅니다"),
+    MIN_IS_BIGGER_THAN_MAX(400, "EX004", "최솟값이 최댓값보다 큽니다");
 
     private final String code;
     private final String message;
