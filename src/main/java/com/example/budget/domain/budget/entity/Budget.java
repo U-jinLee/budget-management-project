@@ -33,6 +33,13 @@ public class Budget extends BaseTimeEntity {
         this.category = category;
         this.email = email;
     }
+    @Builder(builderMethodName = "testBuilder", builderClassName = "testBuilder")
+    public Budget(Long amount, Long amountUsed, String category, String email) {
+        this.amount = amount;
+        this.amountUsed = amountUsed;
+        this.category = category;
+        this.email = email;
+    }
 
     public void updateAmount(Long amount) {
         this.amount = amount;

@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 public class BudgetDesignDto {
 
     @Getter
@@ -29,10 +27,8 @@ public class BudgetDesignDto {
 
         private long totalAmount;
 
-        private List<Object> category;
-
-        public static BudgetDesignDto.Response from(long totalAmount, List<Object> categoryAmounts) {
-            return new BudgetDesignDto.Response(totalAmount, categoryAmounts);
+        public static BudgetDesignDto.Response from(long totalAmount) {
+            return new BudgetDesignDto.Response(totalAmount);
         }
 
     }
