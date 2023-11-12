@@ -34,4 +34,19 @@ public class Budget extends BaseTimeEntity {
         this.email = email;
     }
 
+    public void updateAmount(Long amount) {
+        this.amount = amount;
+    }
+
+    public void plusAmountUsed(Long amount) {
+        this.amountUsed += amount;
+    }
+
+    public void minusAmountUsed(Long amount) {
+        //사용 금액에 지출 금액 빼기
+        this.amountUsed -= amount;
+        //사용 금액이 음수면 사용 금액 0으로 초기화
+        if(this.amountUsed < 0) this.amountUsed = 0L;
+    }
+
 }
