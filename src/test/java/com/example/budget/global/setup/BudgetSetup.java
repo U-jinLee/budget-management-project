@@ -1,7 +1,7 @@
 package com.example.budget.global.setup;
 
 import com.example.budget.domain.budget.entity.Budget;
-import com.example.budget.domain.budget.repo.BudgetRepository;
+import com.example.budget.domain.budget.repository.BudgetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

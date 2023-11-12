@@ -2,9 +2,9 @@ package com.example.budget.domain.budget.service;
 
 import com.example.budget.domain.budget.dto.BudgetPostDto;
 import com.example.budget.domain.budget.exception.BudgetAlreadyExistsException;
-import com.example.budget.domain.budget.repo.BudgetRepository;
+import com.example.budget.domain.budget.repository.BudgetRepository;
 import com.example.budget.domain.category.repo.CategoryRepository;
-import com.example.budget.domain.client.repo.ClientRepository;
+import com.example.budget.domain.client.repository.ClientRepository;
 import com.example.budget.domain.expenditure.exception.InvalidRequestBudgetFieldsException;
 import com.example.budget.global.util.ThisMonth;
 import com.example.budget.global.util.TimeUtil;

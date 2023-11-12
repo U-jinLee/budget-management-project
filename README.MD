@@ -20,6 +20,7 @@
 
 ## Skils
 언어 및 프레임워크: ![Static Badge](https://img.shields.io/badge/JAVA-17-green) ![Static Badge](https://img.shields.io/badge/Spring_boot-REST-green)<br/>
+ORM: ![Static Badge](https://img.shields.io/badge/JPA-green) ![Static Badge](https://img.shields.io/badge/QueryDsl-blue)<br/>
 데이터 베이스: ![Static Badge](https://img.shields.io/badge/h2-2.1.214-blue) <br/>
 배포 : ![Static Badge](https://img.shields.io/badge/Docker-039BC6) ![Static Badge](https://img.shields.io/badge/AWS-EC2-orange) <br/>
 
@@ -206,7 +207,8 @@ To run tests, run the following command
 (또는 블로그, 노션 등 링크 연동)
 - [LocalDateTime을 통해 이번 달의 기간을 뽑는 코드]()
 - [Class의 RequestParam은 Method의 @PathVariable에 커버가 된다]()
-
+  - [심지어 사용하지 않아도 된다]()
+- [QueryDsl 세팅]()
 <br/>
 
 ## References

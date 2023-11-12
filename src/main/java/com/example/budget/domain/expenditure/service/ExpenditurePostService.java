@@ -1,7 +1,7 @@
 package com.example.budget.domain.expenditure.service;
 
 import com.example.budget.domain.budget.entity.Budget;
-import com.example.budget.domain.budget.repo.BudgetRepository;
+import com.example.budget.domain.budget.repository.BudgetRepository;
 import com.example.budget.domain.expenditure.dto.ExpenditurePostDto;
 import com.example.budget.domain.expenditure.exception.BudgetNotFoundException;
 import com.example.budget.domain.expenditure.repository.ExpenditureRepository;
