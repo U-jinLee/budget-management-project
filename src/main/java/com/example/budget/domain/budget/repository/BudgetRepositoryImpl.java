@@ -1,7 +1,8 @@
 package com.example.budget.domain.budget.repository;
 
 import com.example.budget.domain.budget.dto.BudgetCategoryAmountVo;
-import com.example.budget.domain.client.dto.CategoryTotalAmountVo;
+import com.example.budget.domain.client.dto.CategoryTotalAmount;
+import com.example.budget.domain.client.dto.CategoryTotalAmountForGuide;
 import com.example.budget.global.util.TimeUtil;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -26,11 +27,49 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
                 .innerJoin(expenditure).on(expenditure.budget.eq(budget))
                 .where(
                         expenditureCreatedTimeBetweenToday(),
-                        budget.email.eq(email)
+                        budgetEmailEq(email)
                 ).fetchOne();
 
-        return Optional.of(result);
+        return Optional.ofNullable(result);
     }
+
+
+    @Override
+    public Optional<Long> findTodayCanUseAmount(String email) {
+
+        Long result = queryFactory.select(
+                        budget.amount.sum().subtract(budget.amountUsed.sum()).divide(TimeUtil.getRemainingDay())
+                )
+                .from(budget)
+                .where(budgetCreatedTimeBetweenThisMonth(),
+                        budgetEmailEq(email))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
+
+    @Override
+    public List<CategoryTotalAmount> findCanUseAmountByCategory(String email) {
+        return queryFactory.select(
+                        Projections.constructor(
+                                CategoryTotalAmount.class,
+                                budget.category,
+                                budget.amount.subtract(budget.amountUsed).divide(TimeUtil.getRemainingDay())
+                        )
+                )
+                .from(budget)
+                .where(
+                        budgetCreatedTimeBetweenThisMonth(),
+                        budgetEmailEq(email))
+                .fetch();
+    }
+
+
+    private BooleanExpression budgetCreatedTimeBetweenThisMonth() {
+        return budget.createdTime.between(TimeUtil.getThisMonth().getStartDateTime(), TimeUtil.getThisMonth().getEndDateTime());
+    }
+
 
     @Override
     public Optional<Long> findTodayTotalAmount() {
@@ -39,7 +78,7 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
                 .from(budget)
                 .fetchOne();
 
-        return Optional.of(result);
+        return Optional.ofNullable(result);
     }
 
     @Override
@@ -56,10 +95,10 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
     }
 
     @Override
-    public List<CategoryTotalAmountVo> findTodayUseAmountByCategory(String email) {
+    public List<CategoryTotalAmountForGuide> findTodayUseAmountByCategory(String email) {
         return queryFactory.select(
                         Projections.constructor(
-                                CategoryTotalAmountVo.class,
+                                CategoryTotalAmountForGuide.class,
                                 budget.category,
                                 budget.amount.subtract(budget.amountUsed).divide(TimeUtil.getRemainingDay()),
                                 expenditure.amount.sum()
@@ -69,8 +108,13 @@ public class BudgetRepositoryImpl implements BudgetRepositoryCustom {
                 .innerJoin(expenditure).on(expenditure.budget.eq(budget))
                 .where(
                         expenditureCreatedTimeBetweenToday(),
-                        budget.email.eq(email)
+                        budgetEmailEq(email)
                 ).groupBy(budget.category).fetch();
+    }
+
+
+    private BooleanExpression budgetEmailEq(String email) {
+        return budget.email.eq(email);
     }
 
     private BooleanExpression expenditureCreatedTimeBetweenToday() {

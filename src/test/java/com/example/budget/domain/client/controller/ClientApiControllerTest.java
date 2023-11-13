@@ -44,7 +44,7 @@ class ClientApiControllerTest extends IntegrationTest {
     }
 
     @Test
-    void 금일_사용_가능_금액_성공() throws Exception {
+    void 금일_사용_가능_금액_안내_성공() throws Exception {
         //given
         Client client = clientSetup.save();
 
@@ -52,10 +52,10 @@ class ClientApiControllerTest extends IntegrationTest {
         Category category2 = categorySetup.save("식비");
 
         Budget budget = budgetSetup.save(500000L, 275000L, category1.getName(), client.getEmail());
-        Budget budget2 = budgetSetup.save(300000L, 150000L, category2.getName(), client.getEmail());
+        Budget budget2 = budgetSetup.save(300000L, 650000L, category2.getName(), client.getEmail());
 
         expenditureSetup.save(100000L, budget);
-        expenditureSetup.save(75000L, budget);
+        expenditureSetup.save(175000L, budget);
 
         expenditureSetup.save(100000L, budget2);
         expenditureSetup.save(5000L, budget2);
@@ -68,4 +68,24 @@ class ClientApiControllerTest extends IntegrationTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void 금일_사용_가능_금액_추천_성공() throws Exception {
+        //given
+        Client client = clientSetup.save();
+
+        Category category1 = categorySetup.save("주식");
+        Category category2 = categorySetup.save("식비");
+        Category category3 = categorySetup.save("주거");
+
+        Budget budget = budgetSetup.save(500000L, 275000L, category1.getName(), client.getEmail());
+        Budget budget2 = budgetSetup.save(300000L, 650000L, category2.getName(), client.getEmail());
+        Budget budget3 = budgetSetup.save(800000L, 50000L, category3.getName(), client.getEmail());
+
+        //when
+        mvc.perform(get("/api/clients/{clientId}/budgets/recommend", client.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                //then
+                .andExpect(status().isOk());
+    }
 }

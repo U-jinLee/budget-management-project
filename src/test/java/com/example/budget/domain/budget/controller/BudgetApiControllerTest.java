@@ -10,6 +10,7 @@ import com.example.budget.domain.client.entity.Client;
 import com.example.budget.global.setup.BudgetSetup;
 import com.example.budget.global.setup.CategorySetup;
 import com.example.budget.global.setup.ClientSetup;
+import com.example.budget.global.setup.ExpenditureSetup;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,7 +32,10 @@ class BudgetApiControllerTest extends IntegrationTest {
     @Autowired
     BudgetSetup budgetSetup;
     @Autowired
+    ExpenditureSetup expenditureSetup;
+    @Autowired
     BudgetRepository budgetRepo;
+
 
     @Test
     void 예산_설정_성공() throws Exception {
@@ -98,12 +102,13 @@ class BudgetApiControllerTest extends IntegrationTest {
         Category category4 = categorySetup.save("가족비");
         Category category5 = categorySetup.save("선배비");
 
-        budgetSetup.save(500000L, 275000L, category1.getName(), client.getEmail());
+        Budget budget = budgetSetup.save(500000L, 275000L, category1.getName(), client.getEmail());
         budgetSetup.save(300000L, 150000L, category2.getName(), client.getEmail());
         budgetSetup.save(300000L, 150000L, category3.getName(), client.getEmail());
         budgetSetup.save(110000L, 150000L, category4.getName(), client.getEmail());
         budgetSetup.save(90000L, 150000L, category5.getName(), client.getEmail());
 
+        expenditureSetup.save(100000L, budget);
 
         mvc.perform(get("/api/budgets/design")
                         .contentType(MediaType.APPLICATION_JSON)
