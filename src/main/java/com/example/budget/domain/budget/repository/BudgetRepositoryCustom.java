@@ -11,6 +11,8 @@ public interface BudgetRepositoryCustom {
     //해당 유저의 오늘 사용한 금액의 총량을 계산.
     Optional<Long> findTodayTotalUseAmount(String email);
 
+    Optional<Long> findTodayCanUseAmount(String email);
+
     //예산의 총합 구하기
     Optional<Long> findTodayTotalAmount();
 
