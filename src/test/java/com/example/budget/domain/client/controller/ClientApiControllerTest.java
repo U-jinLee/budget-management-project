@@ -81,12 +81,6 @@ class ClientApiControllerTest extends IntegrationTest {
         Budget budget2 = budgetSetup.save(300000L, 650000L, category2.getName(), client.getEmail());
         Budget budget3 = budgetSetup.save(800000L, 50000L, category3.getName(), client.getEmail());
 
-        expenditureSetup.save(100000L, budget);
-        expenditureSetup.save(175000L, budget);
-
-        expenditureSetup.save(100000L, budget2);
-        expenditureSetup.save(5000L, budget2);
-
         //when
         mvc.perform(get("/api/clients/{clientId}/budgets/recommend", client.getId())
                         .contentType(MediaType.APPLICATION_JSON))

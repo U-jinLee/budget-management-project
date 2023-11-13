@@ -3,9 +3,11 @@ package com.example.budget.domain.client.dto;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BudgetGuideDto {
 
     @Getter
@@ -14,10 +16,10 @@ public class BudgetGuideDto {
 
         private long totalAmountSpentToday;
 
-        private List<CategoryTotalAmountVo> categoryTotalAmounts;
+        private List<CategoryTotalAmountForGuide> categoryTotalAmounts;
 
         public static BudgetGuideDto.Response from(long totalAmountUsed,
-                                                   List<CategoryTotalAmountVo> categoryTotalAmounts) {
+                                                   List<CategoryTotalAmountForGuide> categoryTotalAmounts) {
             return new BudgetGuideDto.Response(totalAmountUsed, categoryTotalAmounts);
         }
 

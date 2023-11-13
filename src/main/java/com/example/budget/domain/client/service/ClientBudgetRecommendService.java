@@ -2,12 +2,15 @@ package com.example.budget.domain.client.service;
 
 import com.example.budget.domain.budget.repository.BudgetRepository;
 import com.example.budget.domain.client.dto.BudgetRecommendDto;
+import com.example.budget.domain.client.dto.CategoryTotalAmount;
 import com.example.budget.domain.client.entity.Client;
 import com.example.budget.domain.client.exception.ClientNotFoundException;
 import com.example.budget.domain.client.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -27,7 +30,10 @@ public class ClientBudgetRecommendService {
 
         amountCanSpendToday = (long) Math.round(amountCanSpendToday / 100.0f) * 100;
 
-        return BudgetRecommendDto.Response.from(amountCanSpendToday);
+        List<CategoryTotalAmount> amountCanSpendTodayByCategory
+                = budgetRepo.findCanUseAmountByCategory(client.getEmail());
+
+        return BudgetRecommendDto.Response.from(amountCanSpendToday, amountCanSpendTodayByCategory);
 
     }
 

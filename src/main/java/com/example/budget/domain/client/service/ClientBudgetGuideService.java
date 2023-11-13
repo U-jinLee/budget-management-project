@@ -2,7 +2,7 @@ package com.example.budget.domain.client.service;
 
 import com.example.budget.domain.budget.repository.BudgetRepository;
 import com.example.budget.domain.client.dto.BudgetGuideDto;
-import com.example.budget.domain.client.dto.CategoryTotalAmountVo;
+import com.example.budget.domain.client.dto.CategoryTotalAmountForGuide;
 import com.example.budget.domain.client.entity.Client;
 import com.example.budget.domain.client.exception.ClientNotFoundException;
 import com.example.budget.domain.client.repository.ClientRepository;
@@ -27,7 +27,7 @@ public class ClientBudgetGuideService {
         Long totalAmount = budgetRepo.findTodayTotalUseAmount(client.getEmail())
                 .orElseGet(() -> 0L);
 
-        List<CategoryTotalAmountVo> categories =
+        List<CategoryTotalAmountForGuide> categories =
                 budgetRepo.findTodayUseAmountByCategory(client.getEmail());
 
         return BudgetGuideDto.Response.from(totalAmount, categories);
