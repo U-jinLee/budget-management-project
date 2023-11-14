@@ -26,7 +26,9 @@ public enum ErrorCode {
     MIN_IS_BIGGER_THAN_MAX(400, "EX004", "최솟값이 최댓값보다 큽니다"),
     // Client
     CLIENT_NOT_FOUND(400, "C001", "해당하는 고객이 존재하지 않습니다"),
-    CLIENT_PASSWORD_NOT_MATCH(400, "C002", "비밀번호가 일치하지 않습니다.");
+    CLIENT_PASSWORD_NOT_MATCH(400, "C002", "비밀번호가 일치하지 않습니다"),
+    // Auth
+    NOT_EXISTS_AUTH(400, "ATH001", "권한 정보가 없습니다");
 
     private final String code;
     private final String message;

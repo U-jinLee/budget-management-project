@@ -3,6 +3,7 @@ package com.example.budget.domain.client.service;
 import com.example.budget.domain.client.dto.SignInDto;
 import com.example.budget.domain.client.dto.TokenDto;
 import com.example.budget.global.jwt.JwtProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -18,7 +19,7 @@ public class ClientSignInService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Transactional
-    public TokenDto signIn(SignInDto.Request request) {
+    public TokenDto signIn(SignInDto.Request request, HttpServletResponse servletResponse) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
@@ -26,7 +27,16 @@ public class ClientSignInService {
         Authentication authentication = authenticationManagerBuilder.getObject()
                 .authenticate(authenticationToken);
 
-        return jwtProvider.generateTokens(authentication);
+        TokenDto tokenDto = jwtProvider.generateTokens(authentication);
+
+        setHeader(servletResponse, tokenDto);
+
+        return tokenDto;
     }
 
+
+    private void setHeader(HttpServletResponse servletResponse, TokenDto tokenDto) {
+        servletResponse.addHeader("Autorization", tokenDto.getGrantType()+" "+tokenDto.getAccessToken());
+        servletResponse.addHeader("Refresh_Token", tokenDto.getRefreshToken());
+    }
 }

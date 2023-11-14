@@ -1,11 +1,11 @@
 package com.example.budget.domain.budget.controller;
 
-import com.example.budget.domain.budget.dto.BudgetDesignDto;
 import com.example.budget.domain.budget.dto.BudgetPatchDto;
 import com.example.budget.domain.budget.dto.BudgetPostDto;
 import com.example.budget.domain.budget.service.BudgetDesignService;
 import com.example.budget.domain.budget.service.BudgetPatchService;
 import com.example.budget.domain.budget.service.BudgetPostService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,10 +27,10 @@ public class BudgetApiController {
      * @exception com.example.budget.domain.budget.exception.BudgetAlreadyExistsException 해당하는 예산 설정이 존재할 경우 발생하는 오류
      */
     @PostMapping
-    public ResponseEntity<BudgetPostDto.Response> postBudget(@RequestBody @Valid BudgetPostDto.Request request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(budgetPostService.post(request));
+    public ResponseEntity<BudgetPostDto.Response> postBudget(@RequestBody @Valid BudgetPostDto.Request request,
+                                                             HttpServletRequest servletRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(budgetPostService.post(request, servletRequest));
     }
-
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> patchBudgetAmount(@PathVariable("id") Long id,
