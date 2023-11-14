@@ -25,7 +25,8 @@ public enum ErrorCode {
     START_DATE_IS_BEFORE_END_DATE(400, "EX003", "시작 날짜가 종료 날짜보다 빠릅니다"),
     MIN_IS_BIGGER_THAN_MAX(400, "EX004", "최솟값이 최댓값보다 큽니다"),
     // Client
-    CLIENT_NOT_FOUND(400, "C001", "해당하는 고객이 존재하지 않습니다");
+    CLIENT_NOT_FOUND(400, "C001", "해당하는 고객이 존재하지 않습니다"),
+    CLIENT_PASSWORD_NOT_MATCH(400, "C002", "비밀번호가 일치하지 않습니다.");
 
     private final String code;
     private final String message;
