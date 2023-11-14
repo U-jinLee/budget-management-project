@@ -1,13 +1,14 @@
 package com.example.budget.domain.budget.dto;
 
 import com.example.budget.domain.budget.entity.Budget;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BudgetPostDto {
 
     @Getter
@@ -17,21 +18,16 @@ public class BudgetPostDto {
         @NotNull
         private Long amount;
 
-        @Email
-        @NotEmpty
-        private String email;
-
         @NotEmpty
         private String category;
 
-        public static Request from(Long amount,String email, String category) {
+        public static Request from(Long amount, String category) {
             return new Request(
                     amount,
-                    email,
                     category);
         }
 
-        public Budget toEntity() {
+        public Budget toEntity(String email) {
             return Budget.builder()
                     .amount(amount)
                     .email(email)

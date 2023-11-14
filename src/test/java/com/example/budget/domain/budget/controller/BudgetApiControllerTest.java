@@ -44,7 +44,7 @@ class BudgetApiControllerTest extends IntegrationTest {
         Client client = clientSetup.save();
         //when
         BudgetPostDto.Request request =
-                BudgetPostDto.Request.from(1000000L, client.getEmail(), category.getName());
+                BudgetPostDto.Request.from(1000000L, category.getName());
 
         mvc.perform(post("/api/budgets")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ class BudgetApiControllerTest extends IntegrationTest {
 
         //when
         BudgetPostDto.Request request =
-                BudgetPostDto.Request.from(1000000L, client.getEmail(), category.getName());
+                BudgetPostDto.Request.from(1000000L, category.getName());
 
         mvc.perform(post("/api/budgets")
                         .contentType(MediaType.APPLICATION_JSON)
