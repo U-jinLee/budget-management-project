@@ -10,10 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/authenticate")
@@ -28,10 +25,10 @@ public class AuthenticateApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(signUpService.signUp(request));
     }
 
-    @PostMapping("/sign-in")
+    @GetMapping("/sign-in")
     public ResponseEntity<TokenDto> signIn(@RequestBody @Valid SignInDto.Request request,
                                            HttpServletResponse servletResponse) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(signInService.signIn(request, servletResponse));
+        return ResponseEntity.status(HttpStatus.OK).body(signInService.signIn(request, servletResponse));
     }
 
 }
