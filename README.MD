@@ -38,9 +38,11 @@ ORM: ![Static Badge](https://img.shields.io/badge/JPA-green) ![Static Badge](htt
 > ![coverage](https://user-images.githubusercontent.com/48683566/56673924-0b84ae00-66b1-11e9-93ac-fb76ff96a5a0.png)
 
 ## API Reference
+[![POST_MAN](https://img.shields.io/badge/POSTMAN_-CLICK🖱-%23000000.svg?style=for-the-badge&logo=postman&logoColor=white)](https://documenter.getpostman.com/view/18383272/2s9YXnzyzu#c75a1c4b-5c46-4741-8c38-9f0e7d976b16)<br>
 
 ## 프로젝트 진행 및 이슈 관리
-> [![Notion](https://img.shields.io/badge/Github_project-%23000000.svg?style=for-the-badge&logo=Github&logoColor=white)](https://github.com/users/U-jinLee/projects/1)<br>
+
+> [![Notion](https://img.shields.io/badge/Github_project_-CLICK🖱-%23000000.svg?style=for-the-badge&logo=Github&logoColor=white)](https://github.com/users/U-jinLee/projects/1)<br>
 ![Project_](src/main/resources/static/img/project.png)
 >
 
