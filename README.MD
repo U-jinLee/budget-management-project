@@ -4,12 +4,12 @@
 
 ## Table of Contents
 - [개요](#개요)
-- [Skils](#skils)
+- [Skill](#Skill)
 - [Installation](#Installation)
 - [Running Tests](#running-tests)
 - [API Reference](#api-reference)
 - [프로젝트 진행 및 이슈 관리](#프로젝트-진행-및-이슈-관리)
-- [ERD](#구현과정(설계-및-의도))
+- [ERD](#ERD)
 - [TIL 및 회고](#til-및-회고)
 
 ## 개요
@@ -56,10 +56,9 @@ ORM: ![Static Badge](https://img.shields.io/badge/JPA-green) ![Static Badge](htt
 > - 지출통계의 통계데이터용 테이블 존재
 
 ## TIL 및 회고
-- [LocalDateTime을 통해 기간 정보 뽑아먹기]()
-- [Class의 RequestParam은 Method의 @PathVariable에 커버가 된다]()
-  - [심지어 사용하지 않아도 된다]()
+- [LocalDateTime을 통해 기간 정보 뽑아먹기](https://diligent-mangosteen-06d.notion.site/LocalDateTime-9b32b72fef45406b9e2162c0360ecaf5?pvs=4)
+- [Optional.of() 대신 Optional.ofNullable() 사용하기](https://diligent-mangosteen-06d.notion.site/Optional-Optional-of-Optional-ofNullable-bd7efda95fa9455c9693180cbfddda81?pvs=4)
+- [Class의 @RequestParam은 Method의 @PathVariable에 커버가 된다](https://diligent-mangosteen-06d.notion.site/Class-RequestParam-Method-PathVariable-546969a4558040d7b9f3e340a493255e?pvs=4)
 - [QueryDsl 세팅](https://diligent-mangosteen-06d.notion.site/Querydsl-bb19c5e700564401a5bf7d4f2eca29b8?pvs=4)
-- [금액 관련 자바 정리]()
-- [Optional.of() 대신 Optional.ofNullable() 사용하기]()
+
 <br/>
