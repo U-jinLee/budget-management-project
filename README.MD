@@ -4,12 +4,12 @@
 
 ## Table of Contents
 - [개요](#개요)
-- [Skils](#skils)
+- [Skill](#Skill)
 - [Installation](#Installation)
 - [Running Tests](#running-tests)
 - [API Reference](#api-reference)
 - [프로젝트 진행 및 이슈 관리](#프로젝트-진행-및-이슈-관리)
-- [ERD](#구현과정(설계-및-의도))
+- [ERD](#ERD)
 - [TIL 및 회고](#til-및-회고)
 
 ## 개요
