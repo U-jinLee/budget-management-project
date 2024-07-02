@@ -4,6 +4,8 @@ import com.example.budget.domain.client.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @ToString
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -11,7 +13,8 @@ import lombok.*;
 @Entity
 public class Client {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "email", nullable = false, unique = true, length = 100)
@@ -22,6 +25,9 @@ public class Client {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(name = "birth_date")
+    private LocalDateTime birthDate;
 
     @Builder
     public Client(String email, String password) {
