@@ -26,7 +26,7 @@ class TradingRecordControllerTest extends IntegrationTest {
                         "반도체 수혜로 인한 매매",
                         LocalDateTime.now(),
                         123.00f,
-                        1.0f,
+                        2.0f,
                         Position.BUY,
                         Currency.USD);
 
