@@ -2,11 +2,9 @@ package com.example.budget.domain.investment.entity;
 
 import com.example.budget.domain.client.entity.Client;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@ToString
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,6 +26,9 @@ public class Stock {
     @Column(name = "annual_dividend")
     private Float annualDividend;
 
+    @Column(name = "total_annual_dividend")
+    private Float totalAnnualDividend;
+
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
@@ -45,5 +46,7 @@ public class Stock {
         this.quantity = quantity;
         this.annualDividend = annualDividend;
         this.client = client;
+        this.totalAnnualDividend = annualDividend * quantity;
     }
+
 }
