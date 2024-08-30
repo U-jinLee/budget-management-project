@@ -27,6 +27,9 @@ public enum ErrorCode {
     // Client
     CLIENT_NOT_FOUND(400, "C001", "해당하는 고객이 존재하지 않습니다"),
     CLIENT_PASSWORD_NOT_MATCH(400, "C002", "비밀번호가 일치하지 않습니다"),
+    // Trade
+    ORDER_NOT_FOUND(400, "TOO1", "Order Not Found"),
+    TRADE_SIGNAL_UNKNOWN(400, "T002", "Trade Signal Unknown"),
     // Auth
     NOT_EXISTS_AUTH(400, "ATH001", "권한 정보가 없습니다");
 
