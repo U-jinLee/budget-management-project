@@ -1,8 +1,10 @@
 package com.example.budget.global.setup;
 
 import com.example.budget.domain.client.entity.Client;
+import com.example.budget.domain.client.model.Role;
 import com.example.budget.domain.client.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,6 +12,9 @@ public class ClientSetup {
 
     @Autowired
     ClientRepository clientRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     public Client save() {
         return clientRepository.save(buildApplicant(0));
@@ -22,9 +27,10 @@ public class ClientSetup {
     }
 
     private Client buildApplicant(int index) {
-        return Client.builder()
+        return Client.testBuilder()
                 .email("test@email.com")
-                .password("test")
+                .password(passwordEncoder.encode("test"))
+                .role(Role.USER)
                 .build();
     }
 

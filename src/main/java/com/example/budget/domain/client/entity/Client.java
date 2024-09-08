@@ -35,4 +35,11 @@ public class Client {
         this.password = password;
         this.role = Role.USER;
     }
+
+    @Builder(builderMethodName = "testBuilder", builderClassName = "testBuilder")
+    public Client(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 }

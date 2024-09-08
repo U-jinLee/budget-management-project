@@ -45,6 +45,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(req ->
                         req
+                                .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/api/authenticate/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/api/budgets/**")).hasRole(Role.USER.name())
                                 .requestMatchers(new AntPathRequestMatcher("/api/clients/**")).hasRole(Role.USER.name())
