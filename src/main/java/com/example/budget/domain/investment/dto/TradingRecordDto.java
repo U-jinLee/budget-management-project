@@ -61,6 +61,8 @@ public class TradingRecordDto {
 
         private float tradingQuantity;
 
+        private float totalPrice;
+
         private Position position;
 
         public Response (TradingRecord tradingRecord) {
@@ -69,8 +71,9 @@ public class TradingRecordDto {
             this.code = tradingRecord.getCode();
             this.tradingReason = tradingRecord.getTradingReason();
             this.tradingDate = tradingRecord.getTradingDate();
-            this.tradingPrice = tradingRecord.getTradingPrice();
+            this.tradingPrice = tradingRecord.getTradingPriceWithSymbol();
             this.tradingQuantity = tradingRecord.getTradingQuantity();
+            this.totalPrice = tradingRecord.getTotalPrice();
             this.position = tradingRecord.getPosition();
         }
     }
