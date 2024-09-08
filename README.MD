@@ -20,9 +20,11 @@
 <br>
 
 ## 개요
-**돈 모아서 뭐하겠노? 소고기 사묵겠지.. 당신을 소고기를 지켜줄! BankStake🐮** <br>
-본 서비스는 사용자의 개인 재무를 관리하고 지출을 추적하는 데 도움을 주는 애플리케이션입니다. 
-이 앱은 사용자들이 예산을 설정하고 지출을 모니터링하며 재무 목표를 달성하는 데 도움이 됩니다.
+**돈 모아서 뭐하겠노? 소고기 사묵겠지.. 당신의 소고기를 벌어줄 BankStake trading bot🤖** <br>
+This is coin futures market trading bot. 
+This bot checks the impulse and divergence of the market, strategizes and positions itself.
+~~본 서비스는 사용자의 개인 재무를 관리하고 지출을 추적하는 데 도움을 주는 애플리케이션입니다. 
+이 앱은 사용자들이 예산을 설정하고 지출을 모니터링하며 재무 목표를 달성하는 데 도움이 됩니다.~~
 
 `주요기능`
 > 1. 유저는 본 사이트에 들어와 회원가입을 통해 서비스를 이용합니다.
