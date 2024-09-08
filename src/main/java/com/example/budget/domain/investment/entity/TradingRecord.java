@@ -1,5 +1,6 @@
 package com.example.budget.domain.investment.entity;
 
+import com.example.budget.domain.client.entity.Client;
 import com.example.budget.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,9 +43,14 @@ public class TradingRecord extends BaseTimeEntity {
     @Enumerated(value = EnumType.STRING)
     private Position position;
 
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+
     @Builder
     public TradingRecord(String name, String code, String tradingReason, LocalDateTime tradingDate,
-                         Float tradingPrice, Float tradingQuantity, Currency currency, Position position) {
+                         Float tradingPrice, Float tradingQuantity, Currency currency, Position position, Client client)
+    {
         this.name = name;
         this.code = code;
         this.tradingReason = tradingReason;
@@ -53,10 +59,16 @@ public class TradingRecord extends BaseTimeEntity {
         this.tradingQuantity = tradingQuantity;
         this.currency = currency;
         this.position = position;
+        this.client = client;
     }
 
-    public String getTradingPrice() {
+    public String getTradingPriceWithSymbol() {
         return this.tradingPrice + this.getCurrency().getSymbol();
     }
+
+    public float getTotalPrice() {
+        return this.tradingPrice * this.tradingQuantity;
+    }
+
 
 }
