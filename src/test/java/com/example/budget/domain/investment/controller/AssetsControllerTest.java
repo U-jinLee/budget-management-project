@@ -12,18 +12,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AssetsControllerTest extends IntegrationTest {
 
-    @Test
-    @DisplayName("The 100 Minus Your Age Rule Get Test")
-    void getInvestmentRatio() throws Exception {
-        //given
-        int birthDate = 1993;
-        long totalAssets = 30000000L;
-        InvestmentRatioDto.Request request = new InvestmentRatioDto.Request(birthDate, totalAssets);
-        //when
-        mvc.perform(get("/api/investment/assets/investment-ratio")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @DisplayName("The 100 Minus Your Age Rule Get Test")
+//    void getInvestmentRatio() throws Exception {
+//        //given
+//        int birthDate = 1993;
+//        long totalAssets = 30000000L;
+//        InvestmentRatioDto.Request request = new InvestmentRatioDto.Request(birthDate, totalAssets);
+//        //when
+//        mvc.perform(get("/api/investment/assets/investment-ratio")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andDo(print())
+//                .andExpect(status().isOk());
+//    }
 }

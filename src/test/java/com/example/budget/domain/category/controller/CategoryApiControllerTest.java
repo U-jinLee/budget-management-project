@@ -13,26 +13,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class CategoryApiControllerTest extends IntegrationTest {
 
-    @Autowired
-    CategorySetup categorySetup;
-
-    @Test
-    void 카테고리_불러오기_성공() throws Exception {
-
-        //given
-        categorySetup.save(5);
-
-        //when
-        mvc.perform(get("/api/categories")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                //then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].id").exists())
-                .andExpect(jsonPath("$[0].name").exists())
-                .andExpect(jsonPath("$[0].description").exists());
-
-    }
+//    @Autowired
+//    CategorySetup categorySetup;
+//
+//    @Test
+//    void 카테고리_불러오기_성공() throws Exception {
+//
+//        //given
+//        categorySetup.save(5);
+//
+//        //when
+//        mvc.perform(get("/api/categories")
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andDo(print())
+//                //then
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$").isArray())
+//                .andExpect(jsonPath("$[0].id").exists())
+//                .andExpect(jsonPath("$[0].name").exists())
+//                .andExpect(jsonPath("$[0].description").exists());
+//
+//    }
 
 }

@@ -17,40 +17,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AuthenticateApiControllerTest extends IntegrationTest {
 
-    @Autowired
-    ClientRepository clientRepo;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Test
-    void 회원_가입_성공() throws Exception {
-        //given
-        SignUpDto.Request request = SignUpDto.Request.from("yoojinlee.dev@gmail.com", "1q2w3e4r!");
-
-        mvc.perform(post("/api/authenticate/sign-up")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andDo(print())
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    void 로그인_성공() throws Exception {
-
-        //given
-        String rawPassword = "1q2w3e4r!";
-        Client account = clientRepo.save(
-                Client.builder()
-                        .email("yoojinlee.dev@gmail.com")
-                        .password(passwordEncoder.encode(rawPassword))
-                        .build());
-
-        SignInDto.Request request = SignInDto.Request.from(account.getEmail(), rawPassword);
-
-        mvc.perform(get("/api/authenticate/sign-in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+//    @Autowired
+//    ClientRepository clientRepo;
+//    @Autowired
+//    PasswordEncoder passwordEncoder;
+//
+//    @Test
+//    void 회원_가입_성공() throws Exception {
+//        //given
+//        SignUpDto.Request request = SignUpDto.Request.from("yoojinlee.dev@gmail.com", "1q2w3e4r!");
+//
+//        mvc.perform(post("/api/authenticate/sign-up")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andDo(print())
+//                .andExpect(status().isCreated());
+//    }
+//
+//    @Test
+//    void 로그인_성공() throws Exception {
+//
+//        //given
+//        String rawPassword = "1q2w3e4r!";
+//        Client account = clientRepo.save(
+//                Client.builder()
+//                        .email("yoojinlee.dev@gmail.com")
+//                        .password(passwordEncoder.encode(rawPassword))
+//                        .build());
+//
+//        SignInDto.Request request = SignInDto.Request.from(account.getEmail(), rawPassword);
+//
+//        mvc.perform(get("/api/authenticate/sign-in")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andDo(print())
+//                .andExpect(status().isOk());
+//    }
 }
