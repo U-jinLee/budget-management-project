@@ -5,8 +5,8 @@ plugins {
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+group = 'com.budget'
+version = '1.0.0-SNAPSHOT'
 
 java {
     sourceCompatibility = '17'
@@ -29,6 +29,10 @@ ext {
 def queryDslVersion = '5.0.0'
 
 dependencies {
+    //mariadb
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.0'
+
+
     implementation 'org.ta4j:ta4j-core:0.16'
     implementation 'com.google.code.gson:gson:2.8.9'
     //binance
