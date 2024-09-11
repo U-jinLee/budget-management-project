@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
+@Table(name = "futures_order")
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +15,6 @@ public class FuturesOrder extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Signal signal;
 

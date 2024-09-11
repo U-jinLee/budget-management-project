@@ -10,6 +10,7 @@ import lombok.ToString;
 @Getter
 @Entity
 @ToString
+@Table(name = "divergence")
 @NoArgsConstructor
 public class Divergence extends BaseTimeEntity {
 
@@ -18,11 +19,9 @@ public class Divergence extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
     private Signal formerSignal;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
     private Signal changeSignal;
 
     @Enumerated(value = EnumType.STRING)
