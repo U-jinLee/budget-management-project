@@ -777,6 +777,8 @@ public class FuturesOrderServiceImpl implements OrderService {
             e.printStackTrace();
         }
 
+        result = result == null ? BigDecimal.ZERO : result;
+
         return !result.equals(BigDecimal.ZERO);
     }
 
