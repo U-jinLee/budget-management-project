@@ -16,6 +16,7 @@ public class FuturesOrder extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "order_signal")
     private Signal orderSignal;
 
     @Column(name = "order_number", nullable = false)
