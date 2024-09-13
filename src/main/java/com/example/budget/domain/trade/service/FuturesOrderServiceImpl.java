@@ -77,7 +77,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                 Collections.reverse(klines);
 
                 //녹색:
-                if (Signal.GREEN.equals(o.getSignal())) {
+                if (Signal.GREEN.equals(o.getOrderSignal())) {
                     // 녹색 1-1: 전전봉 마감이 전봉 마감보다 높을 때 익절,
                     // rsi가 75 이상,
                     // 포지션의 수익률이 36%(레버리지 3배 기준),
@@ -112,7 +112,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                 }
 
                 //노란색:
-                if (Signal.YELLOW.equals(o.getSignal())) {
+                if (Signal.YELLOW.equals(o.getOrderSignal())) {
                     // 노란색 1-1: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
                     if (o.getOrderNumber().equals(1)) {
                         if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
@@ -157,7 +157,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                     }
                 }
 
-                if (Signal.RED.equals(o.getSignal())) {
+                if (Signal.RED.equals(o.getOrderSignal())) {
                     // 적색 1-1: 전전봉 마감이 전봉 마감보다 낮을 때 익절, rsi가 30 이하, 포지션의 수익률이 36%(레버리지 3배 기준), 볼린저 밴드 하단에 닿을 때
                     if (o.getOrderNumber().equals(1)) {
 
@@ -233,7 +233,7 @@ public class FuturesOrderServiceImpl implements OrderService {
             });
 
             //녹색:
-            if (Signal.GREEN.equals(futuresOrder.getSignal())) {
+            if (Signal.GREEN.equals(futuresOrder.getOrderSignal())) {
                 // 녹색 1-1: 전전봉 마감이 전봉 마감보다 높을 때 익절,
                 // rsi가 75 이상,
                 // 포지션의 수익률이 36%(레버리지 3배 기준),
@@ -285,7 +285,7 @@ public class FuturesOrderServiceImpl implements OrderService {
             }
 
             //노란색:
-            if (Signal.YELLOW.equals(futuresOrder.getSignal())) {
+            if (Signal.YELLOW.equals(futuresOrder.getOrderSignal())) {
                 // 노란색 1-1: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
                 if (futuresOrder.getOrderNumber().equals(1)) {
                     if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
@@ -366,7 +366,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                 }
             }
 
-            if (Signal.RED.equals(futuresOrder.getSignal())) {
+            if (Signal.RED.equals(futuresOrder.getOrderSignal())) {
                 // 적색 1-1: 전전봉 마감이 전봉 마감보다 낮을 때 익절, rsi가 30 이하, 포지션의 수익률이 36%(레버리지 3배 기준), 볼린저 밴드 하단에 닿을 때
                 if (futuresOrder.getOrderNumber().equals(1)) {
 
@@ -596,7 +596,7 @@ public class FuturesOrderServiceImpl implements OrderService {
 
         futuresOrderRepository.save(
                 FuturesOrder.builder()
-                        .signal(signal)
+                        .orderSignal(signal)
                         .orderNumber(orderNumber)
                         .orderStatus(OrderStatus.SIGNED)
                         .build());
