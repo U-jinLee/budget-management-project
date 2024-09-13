@@ -16,7 +16,7 @@ public class FuturesOrder extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    private Signal signal;
+    private Signal orderSignal;
 
     @Column(name = "order_number", nullable = false)
     private Integer orderNumber;
@@ -26,8 +26,8 @@ public class FuturesOrder extends BaseTimeEntity {
     private OrderStatus orderStatus;
 
     @Builder
-    FuturesOrder(Signal signal, Integer orderNumber, OrderStatus orderStatus) {
-        this.signal = signal;
+    FuturesOrder(Signal orderSignal, Integer orderNumber, OrderStatus orderStatus) {
+        this.orderSignal = orderSignal;
         this.orderNumber = orderNumber;
         this.orderStatus = orderStatus;
     }
