@@ -450,12 +450,14 @@ public class FuturesOrderServiceImpl implements OrderService {
         RsiDto rsi = barSeries.rsi();
         MaDto sma = barSeries.sma(16);
 
-        RsiDto divergenceRsi = barSeries.rsi(175, 199);
-        MinAndMaxDto divergenceClosePrice = barSeries.closePrice(175, 199);
+        RsiDto divergenceRsi = barSeries.rsi(175, 198);
+        MinAndMaxDto divergenceClosePrice = barSeries.closePrice(175, 198);
 
         Collections.reverse(klines);
-
         BigDecimal markPrice = getMarkPrice();
+
+        log.info("divergenceClosePrice:{}, markPrice:{}, divergence rsi max:{}, rsi:{}", divergenceClosePrice.getMax(), markPrice, divergenceRsi.getMax(), rsi.getValue());
+
         if (Signal.GREEN.equals(signal)) {
 
             /**
