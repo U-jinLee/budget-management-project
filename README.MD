@@ -34,6 +34,9 @@ This bot checks the impulse and divergence of the market, strategizes and positi
 >    - 금일 지출 추천 금액과 사용 금액의 차이를 %로 `위험도`를 보여줍니다.
 > 5. 투자
 >    - Provide `The 100 Minus Your Age Rule` calculate api
+> 6. Trade
+>    - Check divergence system
+>    - Signal-based automatic trading
 
 `추후 구현`
 > 1. 지출 통계
