@@ -25,6 +25,7 @@ public class OrderScheduler {
     private final ImpulseSystem impulseSystem;
     private final DivergenceImpulseSystem divergenceImpulseSystem;
     private final OrderService orderService;
+    private final MarketDataService marketDataService;
 
     @Scheduled(cron = "0 1 0,12 * * *")
     public void runAtMidnightAndNoon() {
@@ -37,20 +38,20 @@ public class OrderScheduler {
      */
     @Scheduled(cron = "0 */10 * * * *")
     public void runEveryTenMinutes() {
-        List<KlineDto> halfTimeKlines =
-                orderService.getFuturesHistoricalKlines(MarketInterval.TWELVE_HOURLY, this.limit, true);
-        BarSeriesUtil halfTimeBarSeries = new BarSeriesUtil(halfTimeKlines);
 
-        List<KlineDto> weekKlines =
-                orderService.getFuturesHistoricalKlines(MarketInterval.WEEKLY, this.limit, true);
-        BarSeriesUtil weekBarSeries = new BarSeriesUtil(weekKlines);
+        List<KlineDto> twelveHourlyMarketLines =
+                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+        BarSeriesUtil halfTimeBarSeries = new BarSeriesUtil(twelveHourlyMarketLines);
+
+        List<KlineDto> weekMarketLines =
+                marketDataService.getFuturesMarketLines(MarketInterval.WEEKLY, true);
+        BarSeriesUtil weekBarSeries = new BarSeriesUtil(weekMarketLines);
 
         /**
          * Impulse Check
          */
-        Num weekEmaSlope = weekBarSeries.ema(16).getSlope();
-        Num histogramSlope = weekBarSeries.macd().getHistogramSlope();
-        Signal signal = impulseSystem.getSignal(weekEmaSlope, histogramSlope);
+        Signal signal = impulseSystem
+                .getSignal(weekBarSeries.ema(16).getSlope(), weekBarSeries.macd().getHistogramSlope());
 
         log.info("Signal :: {}", signal);
 
@@ -60,16 +61,16 @@ public class OrderScheduler {
              */
             log.info("Running take profit");
             signal = divergenceImpulseSystem
-                    .checkDivergence(signal, halfTimeBarSeries, halfTimeKlines, DivergenceType.TAKE_PROFIT);
+                    .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.TAKE_PROFIT);
 
-            orderService.takeProfit(halfTimeKlines);
+            orderService.takeProfit(twelveHourlyMarketLines);
         } else {
             /**
              * Divergence Impulse Check
              */
             log.info("Running order");
             signal = divergenceImpulseSystem
-                    .checkDivergence(signal, halfTimeBarSeries, halfTimeKlines, DivergenceType.ORDER);
+                    .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.ORDER);
 
             orderService.order(signal);
         }
