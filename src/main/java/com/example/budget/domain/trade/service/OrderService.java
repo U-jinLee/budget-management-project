@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface OrderService {
     void partialDisposalTakeProfit();
-    void takeProfit();
+    void takeProfit(List<KlineDto> klines);
     void order(Signal signal);
     List<KlineDto> getFuturesHistoricalKlines(MarketInterval interval, int limit, boolean isReverse);
     boolean isPositionExsits();

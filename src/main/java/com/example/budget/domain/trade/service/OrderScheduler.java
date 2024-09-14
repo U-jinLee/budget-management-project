@@ -62,7 +62,7 @@ public class OrderScheduler {
             signal = divergenceImpulseSystem
                     .checkDivergence(signal, halfTimeBarSeries, halfTimeKlines, DivergenceType.TAKE_PROFIT);
 
-            orderService.takeProfit();
+            orderService.takeProfit(halfTimeKlines);
         } else {
             /**
              * Divergence Impulse Check

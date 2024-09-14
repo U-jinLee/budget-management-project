@@ -204,11 +204,10 @@ public class FuturesOrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public void takeProfit() {
+    public void takeProfit(List<KlineDto> klines) {
         if (futuresOrderRepository.findByOrderStatus(OrderStatus.PARTIAL_DISPOSAL).isPresent()) {
             log.info("Partial disposal exist");
         } else {
-            List<KlineDto> klines = this.getFuturesHistoricalKlines(MarketInterval.TWELVE_HOURLY, 200, true);
             BarSeriesUtil barSeries = new BarSeriesUtil(klines);
             BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
             RsiDto rsi = barSeries.rsi();
