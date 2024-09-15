@@ -18,7 +18,7 @@ echo "> Build file copy"
 cp $REPOSITORY/$PROJECT_NAME/build/libs/*.jar $REPOSITORY/
 
 echo "> Now deployed application pid check"
-CURRENT_PID=$(pgrep -f ${PROJECT_NAME}.*.jar)
+CURRENT_PID=$(pgrep -f *.jar)
 echo "> Now deployed application pid: $CURRENT_PID"
 
 if [ -z "$CURRENT_PID" ]; then
