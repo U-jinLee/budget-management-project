@@ -1,6 +1,5 @@
 package com.example.budget.domain.trade.service;
 
-import com.bybit.api.client.domain.market.MarketInterval;
 import com.example.budget.domain.trade.dto.KlineDto;
 import com.example.budget.domain.trade.model.Signal;
 
@@ -10,7 +9,6 @@ public interface OrderService {
     void partialDisposalTakeProfit();
     void takeProfit(List<KlineDto> klines);
     void order(Signal signal);
-    List<KlineDto> getFuturesHistoricalKlines(MarketInterval interval, int limit, boolean isReverse);
-    boolean isPositionExsits();
+    boolean isPositionExists();
     boolean isOutstandingOrderExist();
 }

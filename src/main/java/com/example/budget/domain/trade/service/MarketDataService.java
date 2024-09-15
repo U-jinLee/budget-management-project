@@ -24,7 +24,14 @@ public class MarketDataService {
 
     private final BybitApiMarketRestClient bybitApiMarketRestClient;
 
-    public List<KlineDto> getFuturesMarketLines(MarketInterval marketInterval, boolean isLatest) {
+    /**
+     * Get market lines from bybit api
+     *
+     * @param marketInterval Check MarketInterval.enum class
+     * @param fromOldest Choose whether to import late data
+     * @return List<KlineDto>
+     */
+    public List<KlineDto> getFuturesMarketLines(MarketInterval marketInterval, boolean fromOldest) {
         MarketDataRequest request = MarketDataRequest.builder()
                 .category(CategoryType.LINEAR)
                 .symbol(Coin.BTCUSDT.getValue())
@@ -44,7 +51,7 @@ public class MarketDataService {
             result.add(KlineDto.newInstance(element.getAsJsonArray()));
         }
 
-        if (isLatest) Collections.reverse(result);
+        if (fromOldest) Collections.reverse(result);
 
         return result;
     }

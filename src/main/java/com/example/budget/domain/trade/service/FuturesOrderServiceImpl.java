@@ -11,7 +11,6 @@ import com.bybit.api.client.domain.position.request.PositionDataRequest;
 import com.bybit.api.client.domain.trade.Side;
 import com.bybit.api.client.domain.trade.request.TradeOrderRequest;
 import com.bybit.api.client.restApi.BybitApiAccountRestClient;
-import com.bybit.api.client.restApi.BybitApiMarketRestClient;
 import com.bybit.api.client.restApi.BybitApiPositionRestClient;
 import com.bybit.api.client.restApi.BybitApiTradeRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
@@ -25,7 +24,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +34,6 @@ import org.ta4j.core.num.DecimalNum;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,19 +53,20 @@ public class FuturesOrderServiceImpl implements OrderService {
     private final BybitApiClientFactory bybitApiClientFactory;
     private final FuturesOrderRepository futuresOrderRepository;
     private final DivergenceRepository divergenceRepository;
-
+    private final MarketDataService marketDataService;
 
     @Override
     @Transactional
     public void partialDisposalTakeProfit() {
         futuresOrderRepository.findByOrderStatus(OrderStatus.PARTIAL_DISPOSAL).ifPresent(o -> {
-            if (isPositionExsits()) {
+            if (isPositionExists()) {
                 Boolean isTakeProfitDone = false;
                 PositionVo positionInfo = getPositionInfo();
                 BigDecimal markPrice = getMarkPrice();
 
                 List<KlineDto> klines =
-                        this.getFuturesHistoricalKlines(MarketInterval.TWELVE_HOURLY, 200, true);
+                        marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+
                 BarSeriesUtil barSeries = new BarSeriesUtil(klines);
 
                 BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
@@ -430,7 +428,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
         if (Signal.UNKNOWN.equals(signal)) throw new SignalUnknownException();
 
-
         /**
          * If there is a position with a reservation at stake, delete the existing position and enter a new position
          */
@@ -443,7 +440,9 @@ public class FuturesOrderServiceImpl implements OrderService {
             });
         }
 
-        List<KlineDto> klines = this.getFuturesHistoricalKlines(MarketInterval.TWELVE_HOURLY, 200, true);
+        List<KlineDto> klines =
+                this.marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+
         BarSeriesUtil barSeries = new BarSeriesUtil(klines);
         BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
         RsiDto rsi = barSeries.rsi();
@@ -686,33 +685,6 @@ public class FuturesOrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<KlineDto> getFuturesHistoricalKlines(MarketInterval interval, int limit, boolean isReverse) {
-
-        BybitApiMarketRestClient client = bybitApiClientFactory.newMarketDataRestClient();
-
-        MarketDataRequest requestParameter = MarketDataRequest.builder().category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .limit(limit)
-                .marketInterval(interval).build();
-
-        String requestResult = client.getMarketLinesData(requestParameter).toString();
-
-        JsonArray jsonArray = new Gson().fromJson(requestResult, JsonObject.class)
-                .getAsJsonObject("result")
-                .getAsJsonArray("list");
-
-        List<KlineDto> result = new ArrayList<>();
-        for (JsonElement jsonElement : jsonArray) {
-            JsonArray data = jsonElement.getAsJsonArray();
-            result.add(KlineDto.newInstance(data));
-        }
-
-        if (isReverse) Collections.reverse(result);
-
-        return result;
-    }
-
-    @Override
     public boolean isOutstandingOrderExist() {
         BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
 
@@ -755,7 +727,7 @@ public class FuturesOrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean isPositionExsits() {
+    public boolean isPositionExists() {
         BybitApiPositionRestClient client = bybitApiClientFactory.newPositionRestClient();
 
         PositionDataRequest request = PositionDataRequest.builder()
