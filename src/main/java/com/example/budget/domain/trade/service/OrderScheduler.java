@@ -25,6 +25,7 @@ public class OrderScheduler {
     private final DivergenceImpulseSystem divergenceImpulseSystem;
     private final OrderService orderService;
     private final MarketDataService marketDataService;
+    private final BybitPositionService bybitPositionService;
 
     @Scheduled(cron = "0 1 0,12 * * *")
     public void runAtMidnightAndNoon() {
@@ -54,7 +55,7 @@ public class OrderScheduler {
 
         log.info("Signal :: {}", signal);
 
-        if (orderService.isPositionExists()) {
+        if (bybitPositionService.getPositionInfo().isGetPosition()) {
             /**
              * Divergence Impulse Check
              */

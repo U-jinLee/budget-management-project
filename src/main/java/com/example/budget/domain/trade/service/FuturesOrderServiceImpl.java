@@ -54,12 +54,13 @@ public class FuturesOrderServiceImpl implements OrderService {
     private final FuturesOrderRepository futuresOrderRepository;
     private final DivergenceRepository divergenceRepository;
     private final MarketDataService marketDataService;
+    private final BybitPositionService bybitPositionService;
 
     @Override
     @Transactional
     public void partialDisposalTakeProfit() {
         futuresOrderRepository.findByOrderStatus(OrderStatus.PARTIAL_DISPOSAL).ifPresent(o -> {
-            if (isPositionExists()) {
+            if (bybitPositionService.getPositionInfo().isGetPosition()) {
                 Boolean isTakeProfitDone = false;
                 PositionVo positionInfo = getPositionInfo();
                 BigDecimal markPrice = getMarkPrice();
@@ -454,7 +455,8 @@ public class FuturesOrderServiceImpl implements OrderService {
         Collections.reverse(klines);
         BigDecimal markPrice = getMarkPrice();
 
-        log.info("divergenceClosePrice:{}, markPrice:{}, divergence rsi max:{}, rsi:{}", divergenceClosePrice.getMax(), markPrice, divergenceRsi.getMax(), rsi.getValue());
+        log.info("divergenceClosePrice:{}, markPrice:{}, divergence rsi max:{}, rsi:{}",
+                divergenceClosePrice.getMax(), markPrice, divergenceRsi.getMax(), rsi.getValue());
 
         if (Signal.GREEN.equals(signal)) {
 
@@ -594,14 +596,14 @@ public class FuturesOrderServiceImpl implements OrderService {
                 .qty(calculateOrderQuantity(getAvailableBalance()))
                 .build();
 
+        log.info(tradeClient.createOrder(request).toString());
+
         futuresOrderRepository.save(
                 FuturesOrder.builder()
                         .orderSignal(signal)
                         .orderNumber(orderNumber)
                         .orderStatus(OrderStatus.SIGNED)
                         .build());
-
-        tradeClient.createOrder(request);
     }
 
     /**
@@ -726,34 +728,34 @@ public class FuturesOrderServiceImpl implements OrderService {
         futuresOrder.cancelOrder();
     }
 
-    @Override
-    public boolean isPositionExists() {
-        BybitApiPositionRestClient client = bybitApiClientFactory.newPositionRestClient();
-
-        PositionDataRequest request = PositionDataRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .build();
-
-        BigDecimal result = null;
-        try {
-            String json = new ObjectMapper().writeValueAsString(client.getPositionInfo(request));
-
-            result = new Gson().fromJson(json, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list")
-                    .get(0)
-                    .getAsJsonObject()
-                    .get("size")
-                    .getAsBigDecimal();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        result = result == null ? BigDecimal.ZERO : result;
-
-        return !result.equals(BigDecimal.ZERO);
-    }
+//    @Override
+//    public boolean isPositionExists() {
+//        BybitApiPositionRestClient client = bybitApiClientFactory.newPositionRestClient();
+//
+//        PositionDataRequest request = PositionDataRequest.builder()
+//                .category(CategoryType.LINEAR)
+//                .symbol(Coin.BTCUSDT.getValue())
+//                .build();
+//
+//        BigDecimal result = null;
+//        try {
+//            String json = new ObjectMapper().writeValueAsString(client.getPositionInfo(request));
+//
+//            result = new Gson().fromJson(json, JsonObject.class)
+//                    .getAsJsonObject("result")
+//                    .getAsJsonArray("list")
+//                    .get(0)
+//                    .getAsJsonObject()
+//                    .get("size")
+//                    .getAsBigDecimal();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        result = result == null ? BigDecimal.ZERO : result;
+//
+//        return !result.equals(BigDecimal.ZERO);
+//    }
 
     public PositionVo getPositionInfo() {
         BybitApiPositionRestClient client = bybitApiClientFactory.newPositionRestClient();
