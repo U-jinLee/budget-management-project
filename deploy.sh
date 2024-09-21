@@ -16,7 +16,7 @@ echo "> Directory change"
 cd $REPOSITORY
 
 echo "> Build file copy"
-cp $REPOSITORY/$PROJECT_NAME/build/libs/*.jar $REPOSITORY/
+cp $REPOSITORY/$PROJECT_NAME/build/libs/$PROJECT_NAME.*.jar $REPOSITORY/
 
 echo "> Now deployed application pid check"
 CURRENT_PID=$(pgrep -f $PROJECT_NAME.*.jar)
