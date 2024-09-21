@@ -1,7 +1,7 @@
 #!/bin/bash
 
-REPOSITORY=/home/ec2-user/app/
-PROJECT_NAME=budget-management
+REPOSITORY=/home/ec2-user/app
+PROJECT_NAME=budget-management-project
 
 cd $REPOSITORY/$PROJECT_NAME/
 
