@@ -9,6 +9,5 @@ public interface OrderService {
     void partialDisposalTakeProfit();
     void takeProfit(List<KlineDto> klines);
     void order(Signal signal);
-//    boolean isPositionExists();
     boolean isOutstandingOrderExist();
 }

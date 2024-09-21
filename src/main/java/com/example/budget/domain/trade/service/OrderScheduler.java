@@ -55,7 +55,7 @@ public class OrderScheduler {
 
         log.info("Signal :: {}", signal);
 
-        if (bybitPositionService.getPositionInfo().isGetPosition()) {
+        if (bybitPositionService.getPositionInfo().isExists()) {
             /**
              * Divergence Impulse Check
              */

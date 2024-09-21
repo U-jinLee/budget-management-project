@@ -22,6 +22,10 @@ public class BybitPositionService {
 
     private final BybitApiPositionRestClient bybitApiPositionRestClient;
 
+    /**
+     * Get bybit BTCUSDT position information
+     * @return Bybit position information
+     */
     public PositionVo getPositionInfo() {
 
         PositionDataRequest request = PositionDataRequest.builder()
@@ -32,7 +36,6 @@ public class BybitPositionService {
         PositionVo result = PositionVo.newInstance();
 
         try {
-            log.info("Position Info::{}", result);
             String json = new ObjectMapper().writeValueAsString(bybitApiPositionRestClient.getPositionInfo(request));
 
             JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class)
@@ -55,4 +58,5 @@ public class BybitPositionService {
 
         return result;
     }
+
 }

@@ -7,11 +7,9 @@ import com.bybit.api.client.domain.account.request.AccountDataRequest;
 import com.bybit.api.client.domain.market.MarketInterval;
 import com.bybit.api.client.domain.market.request.MarketDataRequest;
 import com.bybit.api.client.domain.position.TpslMode;
-import com.bybit.api.client.domain.position.request.PositionDataRequest;
 import com.bybit.api.client.domain.trade.Side;
 import com.bybit.api.client.domain.trade.request.TradeOrderRequest;
 import com.bybit.api.client.restApi.BybitApiAccountRestClient;
-import com.bybit.api.client.restApi.BybitApiPositionRestClient;
 import com.bybit.api.client.restApi.BybitApiTradeRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
 import com.example.budget.domain.trade.dto.*;
@@ -60,9 +58,9 @@ public class FuturesOrderServiceImpl implements OrderService {
     @Transactional
     public void partialDisposalTakeProfit() {
         futuresOrderRepository.findByOrderStatus(OrderStatus.PARTIAL_DISPOSAL).ifPresent(o -> {
-            if (bybitPositionService.getPositionInfo().isGetPosition()) {
+            PositionVo positionInfo = bybitPositionService.getPositionInfo();
+            if (positionInfo.isExists()) {
                 Boolean isTakeProfitDone = false;
-                PositionVo positionInfo = getPositionInfo();
                 BigDecimal markPrice = getMarkPrice();
 
                 List<KlineDto> klines =
@@ -217,7 +215,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                     .orElseThrow(OrderNotFoundException::new);
 
             BigDecimal markPrice = getMarkPrice();
-            PositionVo positionInfo = getPositionInfo();
+            PositionVo positionInfo = bybitPositionService.getPositionInfo();
 
             //If divergence occurs then dispose The position at the market price
             divergenceRepository.findByDivergenceType(DivergenceType.TAKE_PROFIT).ifPresent(d -> {
@@ -417,8 +415,8 @@ public class FuturesOrderServiceImpl implements OrderService {
 
     private void disposalOrder(Side side, FuturesOrder futuresOrder, BigDecimal markPrice) {
         if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-            newOrder(side, markPrice.toString(),
-                    getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString());
+            BigDecimal positionSize = bybitPositionService.getPositionInfo().getSize();
+            newOrder(side, markPrice.toString(), positionSize.divide(BigDecimal.valueOf(2)).toString());
             futuresOrder.partialDisposeOrder();
         }
     }
@@ -726,68 +724,6 @@ public class FuturesOrderServiceImpl implements OrderService {
         tradeClient.cancelAllOrder(request);
 
         futuresOrder.cancelOrder();
-    }
-
-//    @Override
-//    public boolean isPositionExists() {
-//        BybitApiPositionRestClient client = bybitApiClientFactory.newPositionRestClient();
-//
-//        PositionDataRequest request = PositionDataRequest.builder()
-//                .category(CategoryType.LINEAR)
-//                .symbol(Coin.BTCUSDT.getValue())
-//                .build();
-//
-//        BigDecimal result = null;
-//        try {
-//            String json = new ObjectMapper().writeValueAsString(client.getPositionInfo(request));
-//
-//            result = new Gson().fromJson(json, JsonObject.class)
-//                    .getAsJsonObject("result")
-//                    .getAsJsonArray("list")
-//                    .get(0)
-//                    .getAsJsonObject()
-//                    .get("size")
-//                    .getAsBigDecimal();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        result = result == null ? BigDecimal.ZERO : result;
-//
-//        return !result.equals(BigDecimal.ZERO);
-//    }
-
-    public PositionVo getPositionInfo() {
-        BybitApiPositionRestClient client = bybitApiClientFactory.newPositionRestClient();
-
-        PositionDataRequest request = PositionDataRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .build();
-
-        PositionVo result = PositionVo.newInstance();
-
-        try {
-            String json = new ObjectMapper().writeValueAsString(client.getPositionInfo(request));
-
-            JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list")
-                    .get(0)
-                    .getAsJsonObject();
-
-            result = new PositionVo(
-                    jsonObject.get("symbol").getAsString(),
-                    jsonObject.get("side").getAsString(),
-                    jsonObject.get("positionBalance").getAsBigDecimal(),
-                    jsonObject.get("unrealisedPnl").getAsBigDecimal(),
-                    jsonObject.get("size").getAsBigDecimal());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return result;
     }
 
 }

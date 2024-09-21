@@ -23,7 +23,7 @@ public class PositionVo {
                 .multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_DOWN);
     }
 
-    public boolean isGetPosition() {
+    public boolean isExists() {
         return !size.equals(BigDecimal.ZERO);
     }
 
