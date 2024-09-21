@@ -2,6 +2,7 @@
 
 REPOSITORY=/home/ec2-user/app
 PROJECT_NAME=budget-management-project
+JAR_NAME=budget-management
 
 cd $REPOSITORY/$PROJECT_NAME/
 
@@ -18,7 +19,7 @@ echo "> Build file copy"
 cp $REPOSITORY/$PROJECT_NAME/build/libs/*.jar $REPOSITORY/
 
 echo "> Now deployed application pid check"
-CURRENT_PID=$(pgrep -f $PROJECT_NAME.*.jar)
+CURRENT_PID=$(pgrep -f $JAR_NAME.*.jar)
 echo "> Now deployed application pid: $CURRENT_PID"
 
 if [ -z "$CURRENT_PID" ]; then
