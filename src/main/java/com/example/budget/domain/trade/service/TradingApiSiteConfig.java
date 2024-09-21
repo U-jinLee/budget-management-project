@@ -1,5 +1,6 @@
 package com.example.budget.domain.trade.service;
 
+import com.bybit.api.client.restApi.BybitApiAccountRestClient;
 import com.bybit.api.client.restApi.BybitApiMarketRestClient;
 import com.bybit.api.client.restApi.BybitApiPositionRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
@@ -34,6 +35,11 @@ public class TradingApiSiteConfig {
     @Bean
     public BybitApiPositionRestClient getBybitPositionRestClient() {
         return BybitApiClientFactory.newInstance(bybitApiKey, bybitSecretKey, domain).newPositionRestClient();
+    }
+
+    @Bean
+    public BybitApiAccountRestClient getBybitApiAccountRestClient() {
+        return BybitApiClientFactory.newInstance(bybitApiKey, bybitSecretKey, domain).newAccountRestClient();
     }
 
 }

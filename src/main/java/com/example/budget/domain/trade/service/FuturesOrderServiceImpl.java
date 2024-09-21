@@ -51,6 +51,7 @@ public class FuturesOrderServiceImpl implements OrderService {
     private final DivergenceRepository divergenceRepository;
     private final MarketDataService marketDataService;
     private final BybitPositionService bybitPositionService;
+    private final BybitAccountService bybitAccountService;
 
     @Override
     @Transactional
@@ -226,6 +227,8 @@ public class FuturesOrderServiceImpl implements OrderService {
                 divergenceRepository.delete(d);
             });
 
+            BigDecimal balance = bybitAccountService.getUSDTAvailableBalance().getBalance();
+
             //녹색:
             if (Signal.GREEN.equals(futuresOrder.getOrderSignal())) {
                 // 녹색 1-1: 전전봉 마감이 전봉 마감보다 높을 때 익절,
@@ -239,7 +242,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
@@ -263,7 +266,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
@@ -288,7 +291,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
@@ -308,7 +311,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
@@ -328,7 +331,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                     ) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
@@ -339,6 +342,7 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                     }
                 }
+
                 // 노란색 1-4: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
                 if (futuresOrder.getOrderNumber().equals(4)) {
                     if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
@@ -347,7 +351,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
@@ -370,7 +374,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
@@ -393,7 +397,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         BigDecimal minimumQty =
-                                calculateOrderQuantity(BigDecimal.valueOf(0.04), getAvailableBalance());
+                                calculateOrderQuantity(BigDecimal.valueOf(0.04), balance);
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
                             newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
@@ -589,7 +593,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                 .price(price)
                 .tpslMode(TpslMode.PARTIAL.getDescription())
                 .stopLoss(stopLoss)
-                .qty(calculateOrderQuantity(getAvailableBalance()))
+                .qty(calculateOrderQuantity(bybitAccountService.getUSDTAvailableBalance().getBalance()))
                 .build();
 
         log.info(tradeClient.createOrder(request).toString());
@@ -608,6 +612,7 @@ public class FuturesOrderServiceImpl implements OrderService {
      * @param balance My balance information
      * @return Purchase quantity
      */
+
     private String calculateOrderQuantity(BigDecimal balance) {
         return balance.multiply(POSITION_SIZE).divide(marketDataService.getMarkPrice(), 3, RoundingMode.HALF_UP).toString();
     }
@@ -621,41 +626,6 @@ public class FuturesOrderServiceImpl implements OrderService {
      */
     private BigDecimal calculateOrderQuantity(BigDecimal positionSize, BigDecimal balance) {
         return balance.multiply(positionSize).divide(marketDataService.getMarkPrice(), 3, RoundingMode.HALF_UP);
-    }
-
-    /**
-     * Get my order available balance
-     *
-     * @return My order available balance
-     */
-    private BigDecimal getAvailableBalance() {
-        BybitApiAccountRestClient client = bybitApiClientFactory.newAccountRestClient();
-
-        AccountDataRequest request = AccountDataRequest.builder()
-                .accountType(AccountType.UNIFIED)
-                .build();
-
-        BigDecimal result = BigDecimal.ZERO;
-
-        try {
-            String jsonString = new ObjectMapper().writeValueAsString(client.getWalletBalance(request));
-
-            result = new Gson().fromJson(jsonString, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list")
-                    .get(0)
-                    .getAsJsonObject()
-                    .getAsJsonArray("coin")
-                    .get(3)
-                    .getAsJsonObject()
-                    .get("availableToWithdraw")
-                    .getAsBigDecimal();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return result;
     }
 
     @Override
