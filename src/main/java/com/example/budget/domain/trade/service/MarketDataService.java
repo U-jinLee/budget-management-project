@@ -7,17 +7,22 @@ import com.bybit.api.client.restApi.BybitApiMarketRestClient;
 import com.example.budget.domain.trade.dto.KlineDto;
 import com.example.budget.domain.trade.model.Coin;
 import com.example.budget.domain.trade.model.Limit;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MarketDataService {
@@ -56,4 +61,27 @@ public class MarketDataService {
         return result;
     }
 
+    public BigDecimal getMarkPrice() {
+        MarketDataRequest request = MarketDataRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol(Coin.BTCUSDT.getValue())
+                .build();
+
+        var marketTickers = bybitApiMarketRestClient.getMarketTickers(request);
+
+        BigDecimal markPrice = null;
+        try {
+            String result = new ObjectMapper().writeValueAsString(marketTickers);
+            JsonObject jsonObject = new Gson().fromJson(result, JsonObject.class);
+
+            markPrice = jsonObject.getAsJsonObject("result")
+                    .getAsJsonArray("list")
+                    .get(0).getAsJsonObject().get("markPrice").getAsBigDecimal();
+
+        } catch (JsonProcessingException e) {
+            log.info(e.getMessage());
+        }
+
+        return markPrice;
+    }
 }

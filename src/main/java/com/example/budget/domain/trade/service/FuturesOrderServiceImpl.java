@@ -5,7 +5,6 @@ import com.bybit.api.client.domain.TradeOrderType;
 import com.bybit.api.client.domain.account.AccountType;
 import com.bybit.api.client.domain.account.request.AccountDataRequest;
 import com.bybit.api.client.domain.market.MarketInterval;
-import com.bybit.api.client.domain.market.request.MarketDataRequest;
 import com.bybit.api.client.domain.position.TpslMode;
 import com.bybit.api.client.domain.trade.Side;
 import com.bybit.api.client.domain.trade.request.TradeOrderRequest;
@@ -18,7 +17,6 @@ import com.example.budget.domain.trade.exception.SignalUnknownException;
 import com.example.budget.domain.trade.model.*;
 import com.example.budget.domain.trade.repository.DivergenceRepository;
 import com.example.budget.domain.trade.repository.FuturesOrderRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -61,7 +59,7 @@ public class FuturesOrderServiceImpl implements OrderService {
             PositionVo positionInfo = bybitPositionService.getPositionInfo();
             if (positionInfo.isExists()) {
                 Boolean isTakeProfitDone = false;
-                BigDecimal markPrice = getMarkPrice();
+                BigDecimal markPrice = marketDataService.getMarkPrice();
 
                 List<KlineDto> klines =
                         marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
@@ -214,7 +212,7 @@ public class FuturesOrderServiceImpl implements OrderService {
             FuturesOrder futuresOrder = futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED)
                     .orElseThrow(OrderNotFoundException::new);
 
-            BigDecimal markPrice = getMarkPrice();
+            BigDecimal markPrice = marketDataService.getMarkPrice();
             PositionVo positionInfo = bybitPositionService.getPositionInfo();
 
             //If divergence occurs then dispose The position at the market price
@@ -451,7 +449,7 @@ public class FuturesOrderServiceImpl implements OrderService {
         MinAndMaxDto divergenceClosePrice = barSeries.closePrice(175, 198);
 
         Collections.reverse(klines);
-        BigDecimal markPrice = getMarkPrice();
+        BigDecimal markPrice = marketDataService.getMarkPrice();
 
         log.info("divergenceClosePrice:{}, markPrice:{}, divergence rsi max:{}, rsi:{}",
                 divergenceClosePrice.getMax(), markPrice, divergenceRsi.getMax(), rsi.getValue());
@@ -504,7 +502,7 @@ public class FuturesOrderServiceImpl implements OrderService {
             //RSI Divergenced 시
             if (divergenceClosePrice.getMin().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) &&
                     divergenceRsi.getMin().isLessThanOrEqual(rsi.getValue())) {
-                BigDecimal price = getMarkPrice();
+                BigDecimal price = marketDataService.getMarkPrice();
                 String stopLoss = price.multiply(BigDecimal.valueOf(0.95)).toString();
                 newOrder(Side.BUY, price.toString(), stopLoss, signal, 3);
             }
@@ -513,7 +511,7 @@ public class FuturesOrderServiceImpl implements OrderService {
             //RSI Divergenced 시
             if (divergenceClosePrice.getMax().isLessThanOrEqual(DecimalNum.valueOf(markPrice))
                     && divergenceRsi.getMax().isGreaterThanOrEqual(rsi.getValue())) {
-                BigDecimal price = getMarkPrice();
+                BigDecimal price = marketDataService.getMarkPrice();
                 String stopLoss = price.multiply(BigDecimal.valueOf(1.05)).toString();
                 newOrder(Side.SELL, price.toString(), stopLoss, signal, 4);
             }
@@ -611,7 +609,7 @@ public class FuturesOrderServiceImpl implements OrderService {
      * @return Purchase quantity
      */
     private String calculateOrderQuantity(BigDecimal balance) {
-        return balance.multiply(POSITION_SIZE).divide(getMarkPrice(), 3, RoundingMode.HALF_UP).toString();
+        return balance.multiply(POSITION_SIZE).divide(marketDataService.getMarkPrice(), 3, RoundingMode.HALF_UP).toString();
     }
 
     /**
@@ -622,7 +620,7 @@ public class FuturesOrderServiceImpl implements OrderService {
      * @return Purchase quantity
      */
     private BigDecimal calculateOrderQuantity(BigDecimal positionSize, BigDecimal balance) {
-        return balance.multiply(positionSize).divide(getMarkPrice(), 3, RoundingMode.HALF_UP);
+        return balance.multiply(positionSize).divide(marketDataService.getMarkPrice(), 3, RoundingMode.HALF_UP);
     }
 
     /**
@@ -658,30 +656,6 @@ public class FuturesOrderServiceImpl implements OrderService {
         }
 
         return result;
-    }
-
-    private BigDecimal getMarkPrice() {
-        MarketDataRequest request = MarketDataRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .build();
-
-        var marketTickers = bybitApiClientFactory.newMarketDataRestClient().getMarketTickers(request);
-
-        BigDecimal markPrice = null;
-        try {
-            String result = new ObjectMapper().writeValueAsString(marketTickers);
-            JsonObject jsonObject = new Gson().fromJson(result, JsonObject.class);
-
-            markPrice = jsonObject.getAsJsonObject("result")
-                    .getAsJsonArray("list")
-                    .get(0).getAsJsonObject().get("markPrice").getAsBigDecimal();
-
-        } catch (JsonProcessingException e) {
-            log.info(e.getMessage());
-        }
-
-        return markPrice;
     }
 
     @Override

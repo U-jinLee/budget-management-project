@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class MarketDataServiceTest extends IntegrationTest {
     @Autowired
@@ -22,4 +23,9 @@ class MarketDataServiceTest extends IntegrationTest {
         assertEquals(200, result.size());
     }
 
+    @Test
+    @DisplayName("Get BTCUSDT mark price")
+    void getMarkPrice() {
+        assertNotEquals(null, marketDataService.getMarkPrice());
+    }
 }
