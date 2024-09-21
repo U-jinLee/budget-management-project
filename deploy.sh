@@ -9,7 +9,6 @@ echo ">Git pull"
 git pull
 
 echo "> Project build start"
-./gradlew clean
 ./gradlew build
 
 echo "> Directory change"
