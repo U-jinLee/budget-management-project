@@ -3,6 +3,7 @@ package com.example.budget.domain.trade.service;
 import com.bybit.api.client.restApi.BybitApiAccountRestClient;
 import com.bybit.api.client.restApi.BybitApiMarketRestClient;
 import com.bybit.api.client.restApi.BybitApiPositionRestClient;
+import com.bybit.api.client.restApi.BybitApiTradeRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,11 @@ public class TradingApiSiteConfig {
     @Bean
     public BybitApiAccountRestClient getBybitApiAccountRestClient() {
         return BybitApiClientFactory.newInstance(bybitApiKey, bybitSecretKey, domain).newAccountRestClient();
+    }
+
+    @Bean
+    public BybitApiTradeRestClient getBybitApiTradeRestClient() {
+        return BybitApiClientFactory.newInstance(bybitApiKey, bybitSecretKey, domain).newTradeRestClient();
     }
 
 }

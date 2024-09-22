@@ -2,13 +2,10 @@ package com.example.budget.domain.trade.service;
 
 import com.bybit.api.client.domain.CategoryType;
 import com.bybit.api.client.domain.TradeOrderType;
-import com.bybit.api.client.domain.account.AccountType;
-import com.bybit.api.client.domain.account.request.AccountDataRequest;
 import com.bybit.api.client.domain.market.MarketInterval;
 import com.bybit.api.client.domain.position.TpslMode;
 import com.bybit.api.client.domain.trade.Side;
 import com.bybit.api.client.domain.trade.request.TradeOrderRequest;
-import com.bybit.api.client.restApi.BybitApiAccountRestClient;
 import com.bybit.api.client.restApi.BybitApiTradeRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
 import com.example.budget.domain.trade.dto.*;
@@ -29,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.ta4j.core.num.DecimalNum;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,6 +48,7 @@ public class FuturesOrderServiceImpl implements OrderService {
     private final MarketDataService marketDataService;
     private final BybitPositionService bybitPositionService;
     private final BybitAccountService bybitAccountService;
+    private final BybitTradeService bybitTradeService;
 
     @Override
     @Transactional
@@ -412,7 +409,9 @@ public class FuturesOrderServiceImpl implements OrderService {
          * If there is a position with a reservation at stake, delete the existing position and enter a new position
          */
         if (isOutstandingOrderExist()) {
-            cancelAllOrder();
+            bybitTradeService.cancelAllOrder();
+            futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED)
+                    .orElseThrow(OrderNotFoundException::new).cancelOrder();
         } else {
             futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED).ifPresent(o -> {
                 o.cancelOrder();
@@ -613,22 +612,6 @@ public class FuturesOrderServiceImpl implements OrderService {
         }
 
         return result;
-    }
-
-    public void cancelAllOrder() {
-        BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
-
-        TradeOrderRequest request = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .build();
-
-        FuturesOrder futuresOrder = futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED)
-                .orElseThrow(OrderNotFoundException::new);
-
-        tradeClient.cancelAllOrder(request);
-
-        futuresOrder.cancelOrder();
     }
 
 }
