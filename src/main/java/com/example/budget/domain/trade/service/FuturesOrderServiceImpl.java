@@ -81,7 +81,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
                                 rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
                                 bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
 
@@ -96,7 +99,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
                                 rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
                                 bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
 
@@ -112,7 +118,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
 
@@ -123,7 +132,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
                     }
@@ -132,9 +144,11 @@ public class FuturesOrderServiceImpl implements OrderService {
                         if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
                                 bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))
-                        ) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+                                rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
+
+                            bybitTradeService
+                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
                     }
@@ -144,7 +158,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                                 rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
                     }
@@ -158,7 +175,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
                                 rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
                                 bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
 
@@ -172,7 +192,10 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
                                 rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
                                 bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
+                            bybitTradeService
+                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+
                             isTakeProfitDone = true;
                         }
 
@@ -217,12 +240,14 @@ public class FuturesOrderServiceImpl implements OrderService {
             //If divergence occurs then dispose The position at the market price
             divergenceRepository.findByDivergenceType(DivergenceType.TAKE_PROFIT).ifPresent(d -> {
 
-                newMarketOrder(positionInfo.getSide().equals("Sell") ? Side.BUY : Side.SELL,
-                        positionInfo.getSize().toString());
+                bybitTradeService.createOrder(positionInfo.getSide().equals("Sell") ? Side.BUY : Side.SELL,
+                        positionInfo.getSize().toString(),
+                        TradeOrderType.MARKET);
 
                 futuresOrder.cancelOrder();
 
                 divergenceRepository.delete(d);
+
             });
 
             BigDecimal minimumQty = bybitAccountService.getUSDTAvailableBalance().
@@ -240,9 +265,8 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
                             bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
-
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.SELL, futuresOrder, markPrice);
@@ -263,7 +287,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.SELL, futuresOrder, markPrice);
@@ -285,7 +309,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.SELL, futuresOrder, markPrice);
@@ -302,7 +326,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.BUY, futuresOrder, markPrice);
@@ -319,7 +343,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                     ) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.SELL, futuresOrder, markPrice);
@@ -336,7 +360,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.BUY, futuresOrder, markPrice);
@@ -356,7 +380,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.BUY, futuresOrder, markPrice);
@@ -376,7 +400,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                             bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
 
                         if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSide());
+                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
                             futuresOrder.finishOrder();
                         } else {
                             disposalOrder(Side.BUY, futuresOrder, markPrice);
@@ -529,20 +553,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
         }
 
-    }
-
-    private void newMarketOrder(Side side, String quantity) {
-        BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
-
-        TradeOrderRequest request = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .side(side)
-                .orderType(TradeOrderType.MARKET)
-                .qty(quantity)
-                .build();
-
-        tradeClient.createOrder(request);
     }
 
     private void newOrder(Side side, String price, String quantity) {
