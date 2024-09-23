@@ -10,6 +10,7 @@ import com.bybit.api.client.restApi.BybitApiTradeRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
 import com.example.budget.domain.trade.dto.*;
 import com.example.budget.domain.trade.exception.OrderNotFoundException;
+import com.example.budget.domain.trade.exception.PositionIsLiquidatedException;
 import com.example.budget.domain.trade.exception.SignalUnknownException;
 import com.example.budget.domain.trade.model.*;
 import com.example.budget.domain.trade.repository.DivergenceRepository;
@@ -26,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.ta4j.core.num.DecimalNum;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -52,376 +55,407 @@ public class FuturesOrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void partialDisposalTakeProfit() {
-        futuresOrderRepository.findByOrderStatus(OrderStatus.PARTIAL_DISPOSAL).ifPresent(o -> {
-            PositionVo positionInfo = bybitPositionService.getPositionInfo();
-            if (positionInfo.isExists()) {
-                Boolean isTakeProfitDone = false;
-                BigDecimal markPrice = marketDataService.getMarkPrice();
+    public void partialDisposalTakeProfit(Signal signal) {
+        ArrayList<OrderStatus> orderStatuses = new ArrayList<>();
+        orderStatuses.add(OrderStatus.SIGNED);
+        orderStatuses.add(OrderStatus.PARTIAL_DISPOSAL);
 
-                List<KlineDto> klines =
-                        marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+        FuturesOrder futuresOrder = futuresOrderRepository.findByOrderStatusIn(orderStatuses)
+                .orElseThrow(OrderNotFoundException::new);
 
-                BarSeriesUtil barSeries = new BarSeriesUtil(klines);
+        PositionVo positionInfo = bybitPositionService.getPositionInfo();
+        BigDecimal markPrice = marketDataService.getMarkPrice();
 
-                BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
-                RsiDto rsi = barSeries.rsi();
+        if (isPositionLiquidated(positionInfo, futuresOrder)) {
+            futuresOrder.liquidatedPosition();
+            throw new PositionIsLiquidatedException();
+        }
 
-                Collections.reverse(klines);
 
-                //녹색:
-                if (Signal.GREEN.equals(o.getOrderSignal())) {
-                    // 녹색 1-1: 전전봉 마감이 전봉 마감보다 높을 때 익절,
-                    // rsi가 75 이상,
-                    // 포지션의 수익률이 36%(레버리지 3배 기준),
-                    // 볼린저 밴드 상단에 닿을 때
-                    if (o.getOrderNumber().equals(1)) {
 
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(36)) >= 0 ||
-                                klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
-                                rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
-                                bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
+        List<KlineDto> klines =
+                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
 
-                            bybitTradeService
-                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+        BarSeriesUtil barSeries = new BarSeriesUtil(klines);
 
-                            isTakeProfitDone = true;
-                        }
+        BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
+        RsiDto rsi = barSeries.rsi();
 
+        Collections.reverse(klines);
+
+        BigDecimal minimumQty = bybitAccountService.getUSDTAvailableBalance()
+                .calculateOrderQuantity(BigDecimal.valueOf(0.065), marketDataService.getMarkPrice());
+
+        Optional<Divergence> divergence = divergenceRepository.findByDivergenceType(DivergenceType.TAKE_PROFIT);
+        /**
+         * Green, Yellow, Red 모두 Divergence에 대한 조건을 정리한다
+         * 1. Signed, Take Profit 두 상황 모두 정리
+         * 2. 반반씩 정리하는 로직은 동일
+         *  a. 일정 수량 아래로 내려왔을 시 모두 정리
+         */
+        //녹색:
+        if (Signal.GREEN.equals(futuresOrder.getOrderSignal())) {
+            // 녹색 1-1: 전전봉 마감이 전봉 마감보다 높을 때 익절,
+            // rsi가 75 이상,
+            // 포지션의 수익률이 36%(레버리지 3배 기준),
+            // 볼린저 밴드 상단에 닿을 때
+            if (futuresOrder.getOrderNumber().equals(1)) {
+
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(36)) >= 0 ||
+                        klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
+                        rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
+                        bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
                     }
 
-                    // 녹색 1-2: 전전봉 마감이 전봉 마감보다 높을 때 익절,
-                    // rsi가 75 이상,
-                    // 포지션의 수익률이 45%(레버리지 3배 기준),
-                    // 볼린저 밴드 상단에 닿을 때,
-                    if (o.getOrderNumber().equals(2)) {
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(45)) >= 0 ||
-                                klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
-                                rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
-                                bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.GREEN)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService
-                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+                                bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
 
-                            isTakeProfitDone = true;
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
                         }
+                    });
 
-                    }
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                }
+                        bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
 
-                //노란색:
-                if (Signal.YELLOW.equals(o.getOrderSignal())) {
-                    // 노란색 1-1: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
-                    if (o.getOrderNumber().equals(1)) {
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                                bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
-
-                            bybitTradeService
-                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
-
-                            isTakeProfitDone = true;
-                        }
-
-                    }
-                    // 노란색 1-2: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
-                    if (o.getOrderNumber().equals(2)) {
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                                bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-
-                            bybitTradeService
-                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-
-                            isTakeProfitDone = true;
-                        }
-                    }
-                    // 노란색 1-3: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
-                    if (o.getOrderNumber().equals(3)) {
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                                bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
-
-                            bybitTradeService
-                                    .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
-
-                            isTakeProfitDone = true;
-                        }
-                    }
-                    // 노란색 1-4: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
-                    if (o.getOrderNumber().equals(4)) {
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                                bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                                rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-
-                            bybitTradeService
-                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-
-                            isTakeProfitDone = true;
-                        }
-                    }
-                }
-
-                if (Signal.RED.equals(o.getOrderSignal())) {
-                    // 적색 1-1: 전전봉 마감이 전봉 마감보다 낮을 때 익절, rsi가 30 이하, 포지션의 수익률이 36%(레버리지 3배 기준), 볼린저 밴드 하단에 닿을 때
-                    if (o.getOrderNumber().equals(1)) {
-
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(36)) >= 0 ||
-                                klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
-                                rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
-                                bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
-
-                            bybitTradeService
-                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-
-                            isTakeProfitDone = true;
-                        }
-
-                    }
-                    // 적색 1-2: 전봉 마감이 지금 마감보다 낮을 때 익절,
-                    // rsi가 30 이하,
-                    // 포지션의 수익률이 45%(레버리지 3배 기준),
-                    // 볼린저 밴드 하단에 닿을 때,
-                    if (o.getOrderNumber().equals(2)) {
-                        if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(45)) >= 0 ||
-                                klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
-                                rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
-                                bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
-
-                            bybitTradeService
-                                    .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-
-                            isTakeProfitDone = true;
-                        }
-
+                        futuresOrder.partialDisposeOrder();
                     }
 
                 }
 
-                if (isTakeProfitDone.equals(true)) {
-                    o.finishOrder();
-                } else {
-                    o.reSigned();
-                }
-
-            } else {
-                o.cancelOrder();
             }
-        });
+
+            // 녹색 1-2: 전전봉 마감이 전봉 마감보다 높을 때 익절,
+            // rsi가 75 이상,
+            // 포지션의 수익률이 45%(레버리지 3배 기준),
+            // 볼린저 밴드 상단에 닿을 때,
+            if (futuresOrder.getOrderNumber().equals(2)) {
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(45)) >= 0 ||
+                        klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
+                        rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
+                        bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.GREEN)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+
+            }
+
+        }
+
+        //노란색:
+        if (Signal.YELLOW.equals(futuresOrder.getOrderSignal())) {
+            // 노란색 1-1: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
+            if (futuresOrder.getOrderNumber().equals(1)) {
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
+                        bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.GREEN)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+
+            }
+            // 노란색 1-2: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
+            if (futuresOrder.getOrderNumber().equals(2)) {
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
+                        bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.RED)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+            }
+            // 노란색 1-3: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
+            if (futuresOrder.getOrderNumber().equals(3)) {
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
+                        bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.GREEN)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.SELL, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+            }
+            // 노란색 1-4: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
+            if (futuresOrder.getOrderNumber().equals(4)) {
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
+                        bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
+                        rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.RED)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+            }
+        }
+
+        if (Signal.RED.equals(futuresOrder.getOrderSignal())) {
+            // 적색 1-1: 전전봉 마감이 전봉 마감보다 낮을 때 익절, rsi가 30 이하, 포지션의 수익률이 36%(레버리지 3배 기준), 볼린저 밴드 하단에 닿을 때
+            if (futuresOrder.getOrderNumber().equals(1)) {
+
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(36)) >= 0 ||
+                        klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
+                        rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
+                        bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.RED)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+
+            }
+            // 적색 1-2: 전봉 마감이 지금 마감보다 낮을 때 익절,
+            // rsi가 30 이하,
+            // 포지션의 수익률이 45%(레버리지 3배 기준),
+            // 볼린저 밴드 하단에 닿을 때,
+            if (futuresOrder.getOrderNumber().equals(2)) {
+                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(45)) >= 0 ||
+                        klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
+                        rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
+                        bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
+
+                    if (!positionInfo.sizeIsBiggerThan(minimumQty)) {
+                        bybitTradeService
+                                .createOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
+                        futuresOrder.finishOrder();
+                    }
+
+                    divergence.ifPresent(d -> {
+                        if (d.getFormerSignal().equals(Signal.RED)) {
+                            if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                                String halfPositionSize =
+                                        bybitPositionService
+                                                .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+
+                                bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+
+                                futuresOrder.partialDisposeOrder();
+                            }
+
+                            divergenceRepository.delete(d);
+                        }
+                    });
+
+                    if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
+                        String halfPositionSize =
+                                bybitPositionService
+                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
+                        bybitTradeService.createOrder(Side.BUY, markPrice.toString(), halfPositionSize);
+                        futuresOrder.partialDisposeOrder();
+                    }
+
+                }
+
+            }
+
+        }
+
     }
 
     /**
-     * 12시간 봉 기준
+     * Position이 청산됐는지에 대한 상태 확인 메서드
+     * futuresOrder에 주문 상태가 활성화 돼 있으며(SIGNED, PARTIAL_DISPOSAL)
+     * Bybit의 PositionInfo에 존재하지 않을 시 true 반환
+     *
+     * @param positionInfo Bybit에서 가져온 Position 정보
+     * @param futuresOrder DB에 저장된 futures order 값
      */
-    @Override
-    @Transactional
-    public void takeProfit(List<KlineDto> klines) {
+    private boolean isPositionLiquidated(PositionVo positionInfo, FuturesOrder futuresOrder) {
+        boolean result = false;
 
-        if (futuresOrderRepository.findByOrderStatus(OrderStatus.PARTIAL_DISPOSAL).isPresent()) {
-            log.info("Partial disposal exist");
-        } else {
-            BarSeriesUtil barSeries = new BarSeriesUtil(klines);
-            BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
-            RsiDto rsi = barSeries.rsi();
+        if (futuresOrder.isPositionActive() && !positionInfo.isExists()) result = true;
 
-            Collections.reverse(klines);
-
-            FuturesOrder futuresOrder = futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED)
-                    .orElseThrow(OrderNotFoundException::new);
-
-            BigDecimal markPrice = marketDataService.getMarkPrice();
-            PositionVo positionInfo = bybitPositionService.getPositionInfo();
-
-            //If divergence occurs then dispose The position at the market price
-            divergenceRepository.findByDivergenceType(DivergenceType.TAKE_PROFIT).ifPresent(d -> {
-
-                bybitTradeService.createOrder(positionInfo.getSide().equals("Sell") ? Side.BUY : Side.SELL,
-                        positionInfo.getSize().toString(),
-                        TradeOrderType.MARKET);
-
-                futuresOrder.cancelOrder();
-
-                divergenceRepository.delete(d);
-
-            });
-
-            BigDecimal minimumQty = bybitAccountService.getUSDTAvailableBalance().
-                    calculateOrderQuantity(BigDecimal.valueOf(0.04), marketDataService.getMarkPrice());
-
-            //녹색:
-            if (Signal.GREEN.equals(futuresOrder.getOrderSignal())) {
-                // 녹색 1-1: 전전봉 마감이 전봉 마감보다 높을 때 익절,
-                // rsi가 75 이상,
-                // 포지션의 수익률이 36%(레버리지 3배 기준),
-                // 볼린저 밴드 상단에 닿을 때
-                if (futuresOrder.getOrderNumber().equals(1)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(36)) >= 0 ||
-                            klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
-                            rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
-                            bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.SELL, futuresOrder, markPrice);
-                        }
-
-                    }
-
-                }
-
-                // 녹색 1-2: 전전봉 마감이 전봉 마감보다 높을 때 익절,
-                // rsi가 75 이상,
-                // 포지션의 수익률이 45%(레버리지 3배 기준),
-                // 볼린저 밴드 상단에 닿을 때,
-                if (futuresOrder.getOrderNumber().equals(2)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(45)) >= 0 ||
-                            klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) > 0 ||
-                            rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(75)) ||
-                            bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.SELL, futuresOrder, markPrice);
-                        }
-
-                    }
-
-                }
-
-            }
-
-            //노란색:
-            if (Signal.YELLOW.equals(futuresOrder.getOrderSignal())) {
-                // 노란색 1-1: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
-                if (futuresOrder.getOrderNumber().equals(1)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                            bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.SELL, futuresOrder, markPrice);
-                        }
-
-                    }
-
-                }
-                // 노란색 1-2: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
-                if (futuresOrder.getOrderNumber().equals(2)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                            bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.BUY, futuresOrder, markPrice);
-                        }
-
-                    }
-                }
-                // 노란색 1-3: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 상단선 도달, rsi 70 이상
-                if (futuresOrder.getOrderNumber().equals(3)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                            bollingerBand.getMiddleBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            bollingerBand.getUpperBand().isLessThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))
-                    ) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.SELL, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.SELL, futuresOrder, markPrice);
-                        }
-
-                    }
-                }
-
-                // 노란색 1-4: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
-                if (futuresOrder.getOrderNumber().equals(4)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
-                            bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
-                            rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.BUY, futuresOrder, markPrice);
-                        }
-
-                    }
-                }
-            }
-
-            if (Signal.RED.equals(futuresOrder.getOrderSignal())) {
-                // 적색 1-1: 전전봉 마감이 전봉 마감보다 낮을 때 익절, rsi가 30 이하, 포지션의 수익률이 36%(레버리지 3배 기준), 볼린저 밴드 하단에 닿을 때
-                if (futuresOrder.getOrderNumber().equals(1)) {
-
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(36)) >= 0 ||
-                            klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
-                            rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
-                            bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.BUY, futuresOrder, markPrice);
-                        }
-
-                    }
-
-                }
-                // 적색 1-2: 전봉 마감이 지금 마감보다 낮을 때 익절,
-                // rsi가 30 이하,
-                // 포지션의 수익률이 45%(레버리지 3배 기준),
-                // 볼린저 밴드 하단에 닿을 때,
-                if (futuresOrder.getOrderNumber().equals(2)) {
-                    if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(45)) >= 0 ||
-                            klines.get(2).getClosePrice().compareTo(klines.get(1).getClosePrice()) < 0 ||
-                            rsi.getValue().isLessThan(DecimalNum.valueOf(30)) ||
-                            bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice))) {
-
-                        if (positionInfo.getSize().compareTo(minimumQty) <= 0) {
-                            newOrder(Side.BUY, markPrice.toString(), positionInfo.getSize().toString());
-                            futuresOrder.finishOrder();
-                        } else {
-                            disposalOrder(Side.BUY, futuresOrder, markPrice);
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
+        return result;
     }
 
-    private void disposalOrder(Side side, FuturesOrder futuresOrder, BigDecimal markPrice) {
-        if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-            BigDecimal positionSize = bybitPositionService.getPositionInfo().getSize();
-            newOrder(side, markPrice.toString(), positionSize.divide(BigDecimal.valueOf(2)).toString());
-            futuresOrder.partialDisposeOrder();
-        }
-    }
 
     @Override
     @Transactional
@@ -555,21 +589,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
     }
 
-    private void newOrder(Side side, String price, String quantity) {
-        BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
-
-        TradeOrderRequest request = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .side(side)
-                .orderType(TradeOrderType.LIMIT)
-                .price(price)
-                .qty(quantity)
-                .build();
-
-        tradeClient.createOrder(request);
-    }
-
     private void newOrder(Side side, String price, String stopLoss, Signal signal, int orderNumber) {
         BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
 
@@ -597,8 +616,7 @@ public class FuturesOrderServiceImpl implements OrderService {
                         .build());
     }
 
-    @Override
-    public boolean isOutstandingOrderExist() {
+    private boolean isOutstandingOrderExist() {
         BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
 
         TradeOrderRequest request = TradeOrderRequest.builder()

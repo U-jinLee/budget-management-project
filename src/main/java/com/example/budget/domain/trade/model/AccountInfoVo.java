@@ -25,7 +25,8 @@ public class AccountInfoVo {
      * @return Purchase quantity
      */
     public BigDecimal calculateOrderQuantity(BigDecimal positionSize, BigDecimal markPrice) {
-        return balance.multiply(positionSize).divide(markPrice, 3, RoundingMode.HALF_UP);
+        return balance.multiply(positionSize).divide(markPrice, 3, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(3));
     }
 
 }

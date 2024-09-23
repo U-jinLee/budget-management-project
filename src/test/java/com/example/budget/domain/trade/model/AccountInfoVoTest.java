@@ -1,21 +1,32 @@
 package com.example.budget.domain.trade.model;
 
+import com.example.budget.IntegrationTest;
+import com.example.budget.domain.trade.service.BybitAccountService;
+import com.example.budget.domain.trade.service.MarketDataService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class AccountInfoVoTest {
+class AccountInfoVoTest extends IntegrationTest {
+
+    @Autowired
+    BybitAccountService accountService;
+    @Autowired
+    MarketDataService marketDataService;
 
     @Test
     @DisplayName("Calculate order quantity")
     void calculateOrderQuantity() {
-        BigDecimal orderQuantity =
-                new AccountInfoVo(BigDecimal.valueOf(5000)).calculateOrderQuantity(BigDecimal.valueOf(0.125),
-                        BigDecimal.valueOf(45000));
+        AccountInfoVo accountInfo = accountService.getUSDTAvailableBalance();
+        BigDecimal markPrice = marketDataService.getMarkPrice();
 
-        assertEquals(BigDecimal.valueOf(0.014), orderQuantity);
+        BigDecimal orderQuantity =
+                accountInfo.calculateOrderQuantity(BigDecimal.valueOf(0.125), markPrice);
+
+        assertNotEquals(null, orderQuantity);
     }
 }

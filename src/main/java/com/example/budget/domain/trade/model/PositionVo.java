@@ -27,6 +27,10 @@ public class PositionVo {
         return !size.equals(BigDecimal.ZERO);
     }
 
+    public boolean sizeIsBiggerThan(BigDecimal number) {
+        return this.size.compareTo(number) > 0 ? true : false;
+    }
+
     public static PositionVo newInstance() {
         return new PositionVo("",
                 "",

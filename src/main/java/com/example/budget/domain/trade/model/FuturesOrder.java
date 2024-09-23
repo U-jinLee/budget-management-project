@@ -4,6 +4,8 @@ import com.example.budget.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Table(name = "futures_order")
 @Entity
@@ -26,11 +28,18 @@ public class FuturesOrder extends BaseTimeEntity {
     @Enumerated(value = EnumType.STRING)
     private OrderStatus orderStatus;
 
+    @Column(name = "order_quantity", precision = 19, scale = 3)
+    private BigDecimal orderQuantity;
+
     @Builder
     FuturesOrder(Signal orderSignal, Integer orderNumber, OrderStatus orderStatus) {
         this.orderSignal = orderSignal;
         this.orderNumber = orderNumber;
         this.orderStatus = orderStatus;
+    }
+
+    public boolean isPositionActive() {
+        return this.orderStatus.equals(OrderStatus.SIGNED) || this.orderStatus.equals(OrderStatus.PARTIAL_DISPOSAL);
     }
 
     public void reSigned() {
@@ -47,6 +56,10 @@ public class FuturesOrder extends BaseTimeEntity {
 
     public void cancelOrder() {
         this.orderStatus = OrderStatus.CANCELED;
+    }
+
+    public void liquidatedPosition() {
+        this.orderStatus = OrderStatus.LIQUIDATED;
     }
 
 }

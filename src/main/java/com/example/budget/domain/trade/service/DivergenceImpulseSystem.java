@@ -42,8 +42,8 @@ public class DivergenceImpulseSystem {
 
     private Signal checkGreenSignalDivergence(Signal signal, BarSeriesUtil barSeries, List<KlineDto> klines) {
         if (Signal.GREEN.equals(signal)) {
-            // Donchian 모델의 가장 높은 가격이 종가의 높은 가격보다 작거나 같을 때
-            DecimalNum highPrice = DecimalNum.valueOf(klines.get(klines.size() - 1).getHighPrice());
+            // Donchian 모델의 가장 높은 가격이 전 종가의 높은 가격보다 작거나 같을 때
+            DecimalNum highPrice = DecimalNum.valueOf(klines.get(klines.size() - 2).getHighPrice());
             if (barSeries.donchianChannel().getUpper().isLessThanOrEqual(highPrice)) {
                 RsiDto rsi = barSeries.rsi();
                 if (rsi.getMax().isGreaterThan(rsi.getValue())) {
@@ -69,7 +69,8 @@ public class DivergenceImpulseSystem {
 
     private Signal checkRedSignalDivergence(Signal signal, BarSeriesUtil barSeries, List<KlineDto> klines) {
         if (Signal.RED.equals(signal)) {
-            DecimalNum lowPrice = DecimalNum.valueOf(klines.get(klines.size() - 1).getLowPrice());
+            // Donchian 모델의 가장 높은 가격이 전 종가의 낮은 가격보다 크거나 같을 때
+            DecimalNum lowPrice = DecimalNum.valueOf(klines.get(klines.size() - 2).getLowPrice());
             if (barSeries.donchianChannel().getLower().isGreaterThanOrEqual(lowPrice)) {
 
                 RsiDto rsi = barSeries.rsi();
