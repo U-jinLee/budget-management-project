@@ -1,6 +1,7 @@
 package com.example.budget.domain.trade.service;
 
 import com.example.budget.IntegrationTest;
+import com.example.budget.domain.trade.model.AccountInfoVo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ class BybitAccountServiceTest extends IntegrationTest {
     @Test
     @DisplayName("Get bybit USDTAvailableBalance")
     void getAvailableBalance() {
-        assertNotEquals(null, bybitAccountService.getUSDTAvailableBalance());
+        AccountInfoVo balance = bybitAccountService.getUSDTAvailableBalance();
+        assertNotEquals(null, balance);
     }
 }

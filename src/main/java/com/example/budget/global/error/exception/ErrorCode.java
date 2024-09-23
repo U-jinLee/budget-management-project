@@ -30,6 +30,7 @@ public enum ErrorCode {
     // Trade
     ORDER_NOT_FOUND(400, "TOO1", "Order Not Found"),
     TRADE_SIGNAL_UNKNOWN(400, "T002", "Trade Signal Unknown"),
+    POSITION_IS_LIQUIDATED(400, "T003", "Position Is Liquidated"),
     // Auth
     NOT_EXISTS_AUTH(400, "ATH001", "권한 정보가 없습니다");
 

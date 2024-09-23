@@ -34,11 +34,8 @@ public class BybitAccountService {
         AccountInfoVo accountInfo = AccountInfoVo.newInstance();
 
         try {
-
             String jsonString =
                     new ObjectMapper().writeValueAsString(bybitApiAccountRestClient.getWalletBalance(request));
-
-            log.info(jsonString);
 
             BigDecimal balance = new Gson().fromJson(jsonString, JsonObject.class)
                     .getAsJsonObject("result")
@@ -46,7 +43,7 @@ public class BybitAccountService {
                     .get(0)
                     .getAsJsonObject()
                     .getAsJsonArray("coin")
-                    .get(3)
+                    .get(0)
                     .getAsJsonObject()
                     .get("availableToWithdraw")
                     .getAsBigDecimal();
