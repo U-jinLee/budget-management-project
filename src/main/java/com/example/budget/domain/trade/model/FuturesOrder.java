@@ -2,9 +2,10 @@ package com.example.budget.domain.trade.model;
 
 import com.example.budget.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Table(name = "futures_order")
@@ -27,9 +28,6 @@ public class FuturesOrder extends BaseTimeEntity {
     @Column(name = "order_status")
     @Enumerated(value = EnumType.STRING)
     private OrderStatus orderStatus;
-
-    @Column(name = "order_quantity", precision = 19, scale = 3)
-    private BigDecimal orderQuantity;
 
     @Builder
     FuturesOrder(Signal orderSignal, Integer orderNumber, OrderStatus orderStatus) {
