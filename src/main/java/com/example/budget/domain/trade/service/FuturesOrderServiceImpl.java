@@ -124,7 +124,6 @@ public class FuturesOrderServiceImpl implements OrderService {
                                 futuresOrder.partialDisposeOrder();
                             }
 
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -169,8 +168,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -215,8 +212,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -255,8 +250,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -294,8 +287,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -333,8 +324,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -376,8 +365,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -419,8 +406,6 @@ public class FuturesOrderServiceImpl implements OrderService {
 
                                 futuresOrder.partialDisposeOrder();
                             }
-
-                            divergenceRepository.delete(d);
                         }
                     });
 
@@ -438,6 +423,7 @@ public class FuturesOrderServiceImpl implements OrderService {
 
         }
 
+        divergence.ifPresent(d ->divergenceRepository.delete(d));
     }
 
     /**
