@@ -16,7 +16,8 @@ class BybitPositionServiceTest extends IntegrationTest {
     @Test
     @DisplayName("Get bybit position info")
     void getPositionInfo() {
-        assertNotEquals(PositionVo.newInstance(), bybitPositionService.getPositionInfo());
+        PositionVo result = bybitPositionService.getPositionInfo();
+        assertNotEquals(PositionVo.newInstance(), result);
     }
 
 }

@@ -8,6 +8,7 @@ import com.example.budget.domain.trade.model.PositionVo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,20 +38,26 @@ public class BybitPositionService {
 
         try {
             String json = new ObjectMapper().writeValueAsString(bybitApiPositionRestClient.getPositionInfo(request));
-
-            JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class)
+            JsonArray jsonArray = new Gson().fromJson(json, JsonObject.class)
                     .getAsJsonObject("result")
-                    .getAsJsonArray("list")
-                    .get(0)
-                    .getAsJsonObject();
+                    .getAsJsonArray("list");
 
-            result = new PositionVo(
-                    jsonObject.get("symbol").getAsString(),
-                    jsonObject.get("side").getAsString(),
-                    jsonObject.get("positionBalance").getAsBigDecimal(),
-                    jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
-                            jsonObject.get("unrealisedPnl").getAsBigDecimal(),
-                    jsonObject.get("size").getAsBigDecimal());
+            if (jsonArray.size() > 0) {
+                JsonObject jsonObject = jsonArray
+                        .get(0)
+                        .getAsJsonObject();
+
+                result = new PositionVo(
+                        jsonObject.get("symbol").getAsString(),
+                        jsonObject.get("leverage").getAsString(),
+                        jsonObject.get("side").getAsString(),
+                        jsonObject.get("positionBalance").getAsBigDecimal(),
+                        jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
+                                jsonObject.get("unrealisedPnl").getAsBigDecimal(),
+                        jsonObject.get("size").getAsBigDecimal(),
+                        jsonObject.get("liqPrice").getAsBigDecimal(),
+                        jsonObject.get("avgPrice").getAsBigDecimal());
+            }
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();

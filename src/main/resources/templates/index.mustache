@@ -1,14 +1,162 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Auto trading bot</title>
 </head>
-    <body>
-        <h1>Auto trading bot service</h1>
-        <h2>Wallet Balance: {{balance}}$</h2>
-    </body>
+
+<body class="flex flex-col mx-auto bg-slate-50">
+<div class="text-3xl mx-auto">
+    <p class="mx-10 my-3">Auto Trading Bot</p>
+</div>
+<div class="mx-auto my-3 text-xl text-indigo-700">Mark Price :
+    <span id="markPrice">$ {{markPrice}}</span>
+</div>
+<div class="grid grid-cols-2 mx-auto  w-screen">
+    <button id="tab1" class=" p-3 bg-slate-700 text-white" onclick="showSection(1)">Status</button>
+    <button id="tab2" class=" p-3 bg-gray-300 text-black" onclick="showSection(2)">History</button>
+</div>
+
+<!--Status-->
+<div id="section1" class="flex-1 mx-auto block">
+
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl w-96 h-fit mx-auto mt-10">
+        <div class="flex flex-col justify-center items-center py-4 text-xl gap-4">
+            <p>Wallet Balance : $<span id="walletBal" class="font-bold">{{balance}}</span></p>
+            <p>Unrealized PNL : $<span id="uPNL" class="font-bold">{{positionInfo.unrealisedPnl}}</span></p>
+        </div>
+
+    </div>
+
+    <div class="bg-slate-100 w-screen mt-10 p-10">
+        <p>Position (<span id="poNo" class="font-bold">1</span>)</p>
+        <div class="flex flex-col p-4 rounded-xl gap-4">
+
+            <p>ticker : <span id="poTicker">{{positionInfo.symbol}}</span></p>
+            <p>Type : <span id="poType">{{positionInfo.side}} {{positionInfo.leverage}}x</span></p>
+            <p>size : <span id="poSize">{{positionInfo.size}}
+            </span>($<span id="poMargin">{{positionInfo.positionBalance}}</span>)</p>
+            <p>Ent.Price : $<span id="entryPrice">{{positionInfo.avgPrice}}</span></p>
+            <p>Liq.Price : $<span id="liqPrice">{{positionInfo.liqPrice}}</span></p>
+        </div>
+    </div>
+
+    <div class="bg-white w-screen mt-10 p-10 rounded-xl shadow-lg">
+        <p>Order Que (<span id="poNo" class="font-bold">1</span>)</p>
+
+        <div class="flex flex-col p-4 rounded-xl gap-4">
+
+            <!-- Open Order Section -->
+            <div class="flex justify-between items-center">
+                <p>Open order : <span id="openOrderNo">2</span></p>
+                <!-- Arrow Button to toggle details -->
+                <button id="toggleButton" class="text-blue-500" onclick="toggleDetails()">▼</button>
+            </div>
+
+            <!-- Hidden details section -->
+            <div id="orderDetails" class="hidden ">
+                <div class="bg-slate-100 rounded-xl m-4 p-4">
+                    <p>Type : <span id="poType">Long 3x</span></p>
+                    <p>Size : <span id="poSize">0.1</span> ($<span id="poMargin">60</span>)</p>
+                    <p>Ent. Price : $<span id="entryPrice">59000.00</span></p>
+                </div>
+                <div class=" bg-slate-100 rounded-xl m-4 p-4">
+                    <p>Type : <span id="poType">Short 3x</span></p>
+                    <p>Size : <span id="poSize">0.1</span> ($<span id="poMargin">60</span>)</p>
+                    <p>Ent. Price : $<span id="entryPrice">65000.00</span></p>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+<!--History-->
+<div id="section2" class="flex-1 mx-auto hidden">
+    <div class="bg-white border border-slate-200 shadow-md rounded-xl w-96 h-fit mx-auto mt-10">
+        <div class="flex flex-col justify-center items-center py-4 text-xl gap-4">
+            <p>Today's PNL : $<span id="walletBal" class="font-bold">10.00</span></p>
+            <p>30days PNL : $<span id="uPNL" class="font-bold">1000.00</span></p>
+        </div>
+
+    </div>
+    <div class="mt-10 p-4">
+        <h1 class="font-bold text-xl">Order History</h1>
+    </div>
+    <div class="bg-slate-100 w-screen mt-10 p-10">
+        <div class="flex flex-row justify-between">
+            <div>
+                <p class="font-bold">
+                    <span id="orderType">Long 3x</span>
+                    <span id="poTicker">BTC/USDT</span> </p>
+            </div>
+            <div>
+                <p class="font-bold">+ 10.09</p>
+            </div>
+        </div>
+        <div class="flex flex-col p-4 rounded-xl gap-4">
+
+            <p>openTime : <span id="orderOpenTime">2024.03.01 13:00:00</span></p>
+            <p>closeTime : <span id="orderCloseTime">2024.03.01 19:00:00</span></p>
+
+            <p>size : <span id="poSize">0.1</span>($<span id="poMargin">60</span>)</p>
+            <p>Entry Price : $<span id="entryPrice">59000.00</span></p>
+            <p>Close Price : $<span id="closePrice">65000.00</span></p>
+            <p>signal : <span id="orderSignal">yellow</span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showSection(tab) {
+        const section1 = document.getElementById('section1');
+        const section2 = document.getElementById('section2');
+        const tab1 = document.getElementById('tab1');
+        const tab2 = document.getElementById('tab2');
+
+        if (tab === 1) {
+            section1.classList.remove('hidden');
+            section1.classList.add('block');
+            section2.classList.remove('block');
+            section2.classList.add('hidden');
+
+            tab1.classList.add('bg-slate-700', 'text-white');
+            tab1.classList.remove('bg-gray-300', 'text-black');
+            tab2.classList.remove('bg-slate-700', 'text-white');
+            tab2.classList.add('bg-gray-300', 'text-black');
+        } else if (tab === 2) {
+            section1.classList.remove('block');
+            section1.classList.add('hidden');
+            section2.classList.remove('hidden');
+            section2.classList.add('block');
+
+            tab2.classList.add('bg-slate-700', 'text-white');
+            tab2.classList.remove('bg-gray-300', 'text-black');
+            tab1.classList.remove('bg-slate-700', 'text-white');
+            tab1.classList.add('bg-gray-300', 'text-black');
+        }
+    }
+      function toggleDetails() {
+            const details = document.getElementById('orderDetails');
+
+            const toggleButton = document.getElementById('toggleButton');
+
+            // Toggle the 'hidden' class
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                toggleButton.textContent = '▲'; // Change arrow direction
+            } else {
+                details.classList.add('hidden');
+                toggleButton.textContent = '▼'; // Change arrow direction
+            }
+        }
+</script>
+
+</body>
+
 </html>
