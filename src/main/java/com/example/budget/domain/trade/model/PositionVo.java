@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 @AllArgsConstructor
 @Getter
 public class PositionVo {
+
     private String symbol;
     private String leverage;
     private String side;
