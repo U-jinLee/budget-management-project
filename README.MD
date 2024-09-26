@@ -37,6 +37,7 @@ This bot checks the impulse and divergence of the market, strategizes and positi
 > 6. Trade
 >    - Check divergence system
 >    - Signal-based automatic trading
+>    - Position 직접 정리 기능 추가
 
 `추후 구현`
 > 1. 지출 통계
