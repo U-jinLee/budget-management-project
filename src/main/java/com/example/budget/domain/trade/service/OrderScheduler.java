@@ -23,7 +23,7 @@ public class OrderScheduler {
     private final MarketDataService marketDataService;
     private final BybitPositionService bybitPositionService;
 
-    @Scheduled(cron = "0 1 0,12 * * *")
+    @Scheduled(cron = "0 1 9,21 * * *")
     public void runAtMidnightAndNoon() {
 
         log.info("Running partial disposal take profit");
