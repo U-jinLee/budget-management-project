@@ -41,55 +41,36 @@ public class DivergenceImpulseSystem {
     }
 
     private Signal checkGreenSignalDivergence(Signal signal, BarSeriesUtil barSeries, List<KlineDto> klines) {
-        if (Signal.GREEN.equals(signal)) {
-            // Donchian 모델의 가장 높은 가격이 전 종가의 높은 가격보다 작거나 같을 때
-            DecimalNum highPrice = DecimalNum.valueOf(klines.get(klines.size() - 2).getHighPrice());
-            if (barSeries.donchianChannel().getUpper().isLessThanOrEqual(highPrice)) {
-                RsiDto rsi = barSeries.rsi();
-                if (rsi.getMax().isGreaterThan(rsi.getValue())) {
-                    signal = Signal.YELLOW;
+        // Donchian 모델의 가장 높은 가격이 전 종가의 높은 가격보다 작거나 같을 때
+        DecimalNum highPrice = DecimalNum.valueOf(klines.get(klines.size() - 2).getHighPrice());
 
-                    if (rsi.getValue().isGreaterThan(DecimalNum.valueOf(70.0))) {
-                        signal = Signal.GREEN;
-                    }
-                }
-            }
-
-            if (barSeries.rsi().getValue().isGreaterThan(DecimalNum.valueOf(80.0))) {
+        if (barSeries.donchianChannel().getUpper().isLessThanOrEqual(highPrice)) {
+            RsiDto rsi = barSeries.rsi();
+            if (rsi.getMax().isGreaterThan(rsi.getValue())) {
                 signal = Signal.YELLOW;
-            }
-
-        } else {
-            if(barSeries.rsi().getValue().isGreaterThan(DecimalNum.valueOf(80.0))) {
-                signal = Signal.YELLOW;
+                if (rsi.getValue().isGreaterThan(DecimalNum.valueOf(70.0))) signal = Signal.GREEN;
             }
         }
+
+        if (barSeries.rsi().getValue().isGreaterThan(DecimalNum.valueOf(80.0))) signal = Signal.YELLOW;
+
         return signal;
     }
 
     private Signal checkRedSignalDivergence(Signal signal, BarSeriesUtil barSeries, List<KlineDto> klines) {
-        if (Signal.RED.equals(signal)) {
-            // Donchian 모델의 가장 높은 가격이 전 종가의 낮은 가격보다 크거나 같을 때
-            DecimalNum lowPrice = DecimalNum.valueOf(klines.get(klines.size() - 2).getLowPrice());
-            if (barSeries.donchianChannel().getLower().isGreaterThanOrEqual(lowPrice)) {
+        // Donchian 모델의 가장 높은 가격이 전 종가의 낮은 가격보다 크거나 같을 때
+        DecimalNum lowPrice = DecimalNum.valueOf(klines.get(klines.size() - 2).getLowPrice());
 
-                RsiDto rsi = barSeries.rsi();
-                if (rsi.getMin().isLessThan(rsi.getValue())) {
-                    signal = Signal.YELLOW;
-                    if(rsi.getValue().isLessThan(DecimalNum.valueOf(30.0))) {
-                        signal = Signal.RED;
-                    }
-                }
-
-                if(barSeries.rsi().getValue().isLessThan(DecimalNum.valueOf(25.0))) {
-                    signal = Signal.YELLOW;
-                }
-            } else {
-                if(barSeries.rsi().getValue().isLessThan(DecimalNum.valueOf(25.0))) {
-                    signal = Signal.YELLOW;
-                }
+        if (barSeries.donchianChannel().getLower().isGreaterThanOrEqual(lowPrice)) {
+            RsiDto rsi = barSeries.rsi();
+            if (rsi.getMin().isLessThan(rsi.getValue())) {
+                signal = Signal.YELLOW;
+                if (rsi.getValue().isLessThan(DecimalNum.valueOf(30.0))) signal = Signal.RED;
             }
         }
+
+        if (barSeries.rsi().getValue().isLessThan(DecimalNum.valueOf(25.0))) signal = Signal.YELLOW;
+
         return signal;
     }
 
