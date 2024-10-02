@@ -55,7 +55,8 @@ public class BybitPositionService {
                         jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
                                 jsonObject.get("unrealisedPnl").getAsBigDecimal(),
                         jsonObject.get("size").getAsBigDecimal(),
-                        jsonObject.get("liqPrice").getAsBigDecimal(),
+                        jsonObject.get("liqPrice").getAsString().equals("") ? BigDecimal.ZERO :
+                                jsonObject.get("liqPrice").getAsBigDecimal(),
                         jsonObject.get("avgPrice").getAsBigDecimal());
             }
 
