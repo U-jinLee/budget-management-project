@@ -11,6 +11,7 @@ import org.ta4j.core.indicators.bollinger.BollingerBandsLowerIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsMiddleIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsUpperIndicator;
 import org.ta4j.core.indicators.donchian.DonchianChannelLowerIndicator;
+import org.ta4j.core.indicators.donchian.DonchianChannelMiddleIndicator;
 import org.ta4j.core.indicators.donchian.DonchianChannelUpperIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.indicators.statistics.StandardDeviationIndicator;
@@ -224,11 +225,13 @@ public class BarSeriesUtil {
 
     }
 
-    public DonchianDto donchianChannel() {
-        DonchianChannelLowerIndicator lower = new DonchianChannelLowerIndicator(series, 34);
-        DonchianChannelUpperIndicator higher = new DonchianChannelUpperIndicator(series, 34);
+    public Donchian donchianChannel() {
+        DonchianChannelLowerIndicator lower = new DonchianChannelLowerIndicator(this.series, 34);
+        DonchianChannelMiddleIndicator middle = new DonchianChannelMiddleIndicator(this.series, 34);
+        DonchianChannelUpperIndicator higher = new DonchianChannelUpperIndicator(this.series, 34);
 
-        return new DonchianDto(lower.getValue(this.series.getEndIndex()),
+        return new Donchian(lower.getValue(this.series.getEndIndex()),
+                middle.getValue(this.series.getEndIndex()),
                 higher.getValue(this.series.getEndIndex()));
     }
 
