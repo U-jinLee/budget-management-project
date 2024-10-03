@@ -45,6 +45,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(req ->
                         req
+                                .requestMatchers(new AntPathRequestMatcher("/img/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/api/authenticate/**")).permitAll()
