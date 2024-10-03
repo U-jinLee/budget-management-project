@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/img/mcicx.svg">
     <title>Magic Conch</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +27,11 @@
 
 <body class="flex flex-col mx-auto bg-zinc-800" style="font-family: Quicksand;">
 <div class="text-4xl mx-auto pt-4">
-    <p class="mx-10 my-3 font-light text-zinc-200">
-        <span class="material-symbols-outlined">monitoring</span>
-        <b>Magic Conch</b>
+    <p class="mx-10 my-3 ">
+        <div class="flex gap-1 items-center ">
+            <img src="/img/mcicx.svg" class="aspect-square w-8">
+            <span class="text-zinc-200">Magic Conch</span>
+        </div>
     </p>
 </div>
 <div class="mx-auto my-3 text-xl text-indigo-400 flex items-center font-bold">Mark Price :
@@ -62,7 +64,7 @@
         <div class="flex flex-col p-4 rounded-b-xl gap-4 font-semibold backdrop-brightness-200 text-gray-300">
 
             <p>ticker : <span id="poTicker">{{positionInfo.symbol}}</span></p>
-            <p>Type : <span id="poType">{{positionInfo.side}} {{positionInfo.leverage}}X</span></p>
+            <p>Type : <span id="poType">{{positionInfo.side}}</span> <span>{{positionInfo.leverage}}X</span></p>
             <p>size : <span id="poSize">{{positionInfo.size}}</span>($<span
                     id="poMargin">{{positionInfo.positionBalance}}</span>)</p>
             <p>Ent.Price : $<span id="entryPrice">{{positionInfo.avgPrice}}</span></p>
@@ -155,7 +157,6 @@
         </div>
     </div>
 </div>
-
 <script type="text/javascript">
     var latestData = null;
     const socket = new WebSocket("wss://stream.bybit.com/v5/public/linear");
@@ -175,69 +176,86 @@
     })
 
     setInterval(() => {
-        document.getElementById("mark_price_value").innerText = latestData;
+        document.getElementById('mark_price_value').innerText = latestData;
+        let side = document.getElementById('poType').innerText;
+        let entryPrice = document.getElementById('entryPrice').innerText;
+        let size = document.getElementById('poSize').innerText;
+        document.getElementById('uPNL').innerText = calculateUnrealizedPnl(side, latestData, entryPrice, size);
     }, 3000)
 
-function showSection(tab) {
-const section1 = document.getElementById('section1');
-const section2 = document.getElementById('section2');
-const tab1 = document.getElementById('tab1');
-const tab2 = document.getElementById('tab2');
+    calculateUnrealizedPnl = (side, markPrice, entryPrice, size) => {
+        var result = 0;
+        if (side == 'Sell') {
+            result = (entryPrice - markPrice) * size;
+        } else if (side == 'Buy') {
+            result = (markPrice - entryPrice) * size;
+        } else {
+            result = 0;
+        }
 
-if (tab === 1) {
-section1.classList.remove('hidden');
-section1.classList.add('block');
-section2.classList.remove('block');
-section2.classList.add('hidden');
+        return Math.ceil(result * 100) / 100;
+    }
 
-tab1.classList.add('bg-zinc-950', 'text-white');
-tab1.classList.remove('bg-gray-700', 'text-black');
-tab2.classList.remove('bg-zinc-950', 'text-white');
-tab2.classList.add('bg-gray-700', 'text-black');
-} else if (tab === 2) {
-section1.classList.remove('block');
-section1.classList.add('hidden');
-section2.classList.remove('hidden');
-section2.classList.add('block');
+                function showSection(tab) {
+                const section1 = document.getElementById('section1');
+                const section2 = document.getElementById('section2');
+                const tab1 = document.getElementById('tab1');
+                const tab2 = document.getElementById('tab2');
 
-tab2.classList.add('bg-zinc-950', 'text-white');
-tab2.classList.remove('bg-gray-700', 'text-black');
-tab1.classList.remove('bg-zinc-950', 'text-white');
-tab1.classList.add('bg-gray-700', 'text-black');
-}
-}
-function toggleDetails() {
-const details = document.getElementById('orderDetails');
+                if (tab === 1) {
+                section1.classList.remove('hidden');
+                section1.classList.add('block');
+                section2.classList.remove('block');
+                section2.classList.add('hidden');
 
-const toggleButton = document.getElementById('toggleButton');
+                tab1.classList.add('bg-zinc-950', 'text-white');
+                tab1.classList.remove('bg-gray-700', 'text-black');
+                tab2.classList.remove('bg-zinc-950', 'text-white');
+                tab2.classList.add('bg-gray-700', 'text-black');
+                } else if (tab === 2) {
+                section1.classList.remove('block');
+                section1.classList.add('hidden');
+                section2.classList.remove('hidden');
+                section2.classList.add('block');
 
-// Toggle the 'hidden' class
-if (details.classList.contains('hidden')) {
-details.classList.remove('hidden');
-toggleButton.innerHTML = 'arrow_circle_up'; // Change arrow direction
-toggleButton.className = 'material-symbols-outlined text-violet-500';
-} else {
-details.classList.add('hidden');
-toggleButton.innerHTML = 'arrow_circle_down'; // Change arrow direction
-toggleButton.className = 'material-symbols-outlined text-violet-500';
-}
-}
-function toggleHistory() {
-const details = document.getElementById('historyDetail');
+                tab2.classList.add('bg-zinc-950', 'text-white');
+                tab2.classList.remove('bg-gray-700', 'text-black');
+                tab1.classList.remove('bg-zinc-950', 'text-white');
+                tab1.classList.add('bg-gray-700', 'text-black');
+                }
+                }
+                function toggleDetails() {
+                const details = document.getElementById('orderDetails');
 
-const toggleButton = document.getElementById('historyButton');
+                const toggleButton = document.getElementById('toggleButton');
 
-// Toggle the 'hidden' class
-if (details.classList.contains('hidden')) {
-    details.classList.remove('hidden');
-    historyButton.innerHTML = 'arrow_circle_up'; // Change arrow direction
-    historyButton.className = 'material-symbols-outlined text-violet-500';
-} else {
-    details.classList.add('hidden');
-    historyButton.innerHTML = 'arrow_circle_down'; // Change arrow direction
-    historyButton.className = 'material-symbols-outlined text-violet-500';
-}
-}
+                // Toggle the 'hidden' class
+                if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                toggleButton.innerHTML = 'arrow_circle_up'; // Change arrow direction
+                toggleButton.className = 'material-symbols-outlined text-violet-500';
+                } else {
+                details.classList.add('hidden');
+                toggleButton.innerHTML = 'arrow_circle_down'; // Change arrow direction
+                toggleButton.className = 'material-symbols-outlined text-violet-500';
+                }
+                }
+                function toggleHistory() {
+                const details = document.getElementById('historyDetail');
+
+                const toggleButton = document.getElementById('historyButton');
+
+                // Toggle the 'hidden' class
+                if (details.classList.contains('hidden')) {
+                    details.classList.remove('hidden');
+                    historyButton.innerHTML = 'arrow_circle_up'; // Change arrow direction
+                    historyButton.className = 'material-symbols-outlined text-violet-500';
+                } else {
+                    details.classList.add('hidden');
+                    historyButton.innerHTML = 'arrow_circle_down'; // Change arrow direction
+                    historyButton.className = 'material-symbols-outlined text-violet-500';
+                }
+                }
 </script>
 
 </body>
