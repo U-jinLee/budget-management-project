@@ -10,14 +10,11 @@ public class BybitFuturesImpulseSystemImpl implements ImpulseSystem {
 
     @Override
     public Signal getSignal(Num maSlope, Num macdSlope) {
-        if (isSignalGreen(maSlope, macdSlope))
-            return Signal.GREEN;
+        if (isSignalGreen(maSlope, macdSlope)) return Signal.GREEN;
 
-        if (isSignalYellow(maSlope, macdSlope))
-            return Signal.YELLOW;
+        if (isSignalYellow(maSlope, macdSlope)) return Signal.YELLOW;
 
-        if (isSignalRed(maSlope, macdSlope))
-            return Signal.RED;
+        if (isSignalRed(maSlope, macdSlope)) return Signal.RED;
 
         return Signal.UNKNOWN;
     }
