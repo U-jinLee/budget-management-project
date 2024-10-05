@@ -1,4 +1,4 @@
-package com.example.budget.domain.trade.dto;
+package com.example.budget.domain.trade.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,18 +10,18 @@ import org.ta4j.core.num.Num;
 
 @Getter
 @AllArgsConstructor
-public class Donchian {
+public class DonchianChannel {
 
     private Num lower;
     private Num middle;
     private Num upper;
 
-    public static Donchian newInstance(BaseBarSeries series) {
+    public static DonchianChannel newInstance(BaseBarSeries series) {
         DonchianChannelLowerIndicator lower = new DonchianChannelLowerIndicator(series, 34);
         DonchianChannelMiddleIndicator middle = new DonchianChannelMiddleIndicator(series, 34);
         DonchianChannelUpperIndicator higher = new DonchianChannelUpperIndicator(series, 34);
 
-        return new Donchian(lower.getValue(series.getEndIndex()),
+        return new DonchianChannel(lower.getValue(series.getEndIndex()),
                 middle.getValue(series.getEndIndex()),
                 higher.getValue(series.getEndIndex()));
     }

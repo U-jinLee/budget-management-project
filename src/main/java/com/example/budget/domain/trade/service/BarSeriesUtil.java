@@ -1,6 +1,7 @@
 package com.example.budget.domain.trade.service;
 
 import com.example.budget.domain.trade.dto.*;
+import com.example.budget.domain.trade.model.DonchianChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.ta4j.core.BaseBarSeries;
 import org.ta4j.core.indicators.EMAIndicator;
@@ -225,12 +226,12 @@ public class BarSeriesUtil {
 
     }
 
-    public Donchian donchianChannel() {
+    public DonchianChannel donchianChannel() {
         DonchianChannelLowerIndicator lower = new DonchianChannelLowerIndicator(this.series, 34);
         DonchianChannelMiddleIndicator middle = new DonchianChannelMiddleIndicator(this.series, 34);
         DonchianChannelUpperIndicator higher = new DonchianChannelUpperIndicator(this.series, 34);
 
-        return new Donchian(lower.getValue(this.series.getEndIndex()),
+        return new DonchianChannel(lower.getValue(this.series.getEndIndex()),
                 middle.getValue(this.series.getEndIndex()),
                 higher.getValue(this.series.getEndIndex()));
     }
