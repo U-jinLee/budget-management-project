@@ -3,6 +3,7 @@ package com.example.budget.domain.trade.controller;
 import com.example.budget.domain.trade.model.PositionVo;
 import com.example.budget.domain.trade.service.BybitAccountService;
 import com.example.budget.domain.trade.service.BybitPositionService;
+import com.example.budget.domain.trade.service.BybitTradeService;
 import com.example.budget.domain.trade.service.MarketDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import java.math.RoundingMode;
 public class TradeController {
 
     private final BybitPositionService bybitPositionService;
+    private final BybitTradeService bybitTradeService;
     private final BybitAccountService bybitAccountService;
     private final MarketDataService marketDataService;
 
@@ -26,11 +28,12 @@ public class TradeController {
         PositionVo positionInfo = bybitPositionService.getPositionInfo();
         BigDecimal balance = bybitAccountService.getUSDTAvailableBalance().getBalance()
                 .setScale(4, RoundingMode.HALF_UP);
+        PositionVo openOrder = bybitTradeService.getOpenOrder();
 
         model.addAttribute("markPrice", markPrice);
         model.addAttribute("positionInfo", positionInfo);
         model.addAttribute("balance", balance);
-
+        model.addAttribute("openOrder", openOrder);
         return "index";
     }
 }

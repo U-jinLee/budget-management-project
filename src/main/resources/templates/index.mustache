@@ -84,7 +84,7 @@
 
             <!-- Open Order Section -->
             <div class="flex justify-between items-center font-semibold">
-                <p class="text-gray-400">Open order : <span id="openOrderNo">2</span></p>
+                <p class="text-gray-400">Open order : <span id="openOrderNo">1</span></p>
                 <!-- Arrow Button to toggle details -->
                 <button id="toggleButton" class="text-violet-500 hover:animate-pulse" onclick="toggleDetails()"><span
                         class="material-symbols-outlined">
@@ -95,14 +95,11 @@
             <!-- Hidden details section -->
             <div id="orderDetails" class="hidden ">
                 <div class="text-gray-300 border-2 border-gray-500 rounded-xl m-4 p-4 hover:border-violet-500">
-                    <p>Type : <span id="poType">Long 3x</span></p>
-                    <p>Size : <span id="poSize">0.1</span> ($<span id="poMargin">60</span>)</p>
-                    <p>Ent. Price : $<span id="entryPrice">59000.00</span></p>
-                </div>
-                <div class="text-gray-300 border-2 border-gray-500 rounded-xl m-4 p-4 hover:border-violet-500">
-                    <p>Type : <span id="poType">Short 3x</span></p>
-                    <p>Size : <span id="poSize">0.1</span> ($<span id="poMargin">60</span>)</p>
-                    <p>Ent. Price : $<span id="entryPrice">65000.00</span></p>
+                    <!--price, side, qty-->
+                    <p>Type : <span id="poType">{{openOrder.side}} 3x</span></p>
+                    <p>Size : <span id="poSize">{{openOrder.size}}</span>
+                        ($<span id="poMargin">{{openOrder.positionBalance}}</span>)</p>
+                    <p>Ent. Price : $<span id="entryPrice">{{openOrder.avgPrice}}</span></p>
                 </div>
             </div>
 

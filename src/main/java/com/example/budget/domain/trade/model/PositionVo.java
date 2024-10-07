@@ -1,6 +1,7 @@
 package com.example.budget.domain.trade.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -32,6 +33,14 @@ public class PositionVo {
 
     public boolean sizeIsBiggerThan(BigDecimal number) {
         return this.size.compareTo(number) > 0;
+    }
+
+    @Builder(builderMethodName = "newOrderBuilder", builderClassName = "newOrderBuilder")
+    public PositionVo(String side, BigDecimal positionBalance, BigDecimal size, BigDecimal avgPrice) {
+        this.side = side;
+        this.positionBalance = positionBalance;
+        this.size = size;
+        this.avgPrice = avgPrice;
     }
 
     public static PositionVo newInstance() {
