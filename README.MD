@@ -20,11 +20,10 @@
 <br>
 
 ## 개요
-**돈 모아서 뭐하겠노? 소고기 사묵겠지.. 당신의 소고기를 벌어줄 BankStake trading bot🤖** <br>
-This is coin futures market trading bot. 
-This bot checks the impulse and divergence of the market, strategizes and positions itself.
-~~본 서비스는 사용자의 개인 재무를 관리하고 지출을 추적하는 데 도움을 주는 애플리케이션입니다. 
-이 앱은 사용자들이 예산을 설정하고 지출을 모니터링하며 재무 목표를 달성하는 데 도움이 됩니다.~~
+**마법의 소라고동님 만세! Magic conch** <br>
+이 앱은 알렉산더 엘더의 투자 원칙을 기반으로 시장 상황을 모니터링해 코인 선물 거래를 자동으로 하는 봇입니다.
+다양한 보조지표를 통해 시장 상황을 분석하고 현재 지갑의 일정 비율을 BTCUSDT에 투자합니다.
+12시간 봉을 간격으로 투자한 포지션이 일정 수익권에 도달했는지 확인해 목표에 도달했다면 절반 씩 익절매합니다.
 
 `주요기능`
 > 1. 유저는 본 사이트에 들어와 회원가입을 통해 서비스를 이용합니다.

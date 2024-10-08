@@ -59,16 +59,20 @@
                 <span class="material-symbols-outlined">
                     local_fire_department
                 </span>
-            <span class="text-xl">Position</span> (<span id="poNo" class="font-bold">1</span>)
+            <span class="text-xl">Position</span> (<span id="poNo" class="font-bold">{{#isPositionExist}}1{{/isPositionExist}}{{^isPositionExist}}0{{/isPositionExist}}</span>)
         </div>
         <div class="flex flex-col p-4 rounded-b-xl gap-4 font-semibold backdrop-brightness-200 text-gray-300">
-
-            <p>ticker : <span id="poTicker">{{positionInfo.symbol}}</span></p>
-            <p>Type : <span id="poType">{{positionInfo.side}}</span> <span>{{positionInfo.leverage}}X</span></p>
-            <p>size : <span id="poSize">{{positionInfo.size}}</span>($<span
-                    id="poMargin">{{positionInfo.positionBalance}}</span>)</p>
-            <p>Ent.Price : $<span id="entryPrice">{{positionInfo.avgPrice}}</span></p>
-            <p>Liq.Price : $<span id="liqPrice">{{positionInfo.liqPrice}}</span></p>
+            {{#isPositionExist}}
+                <p>ticker : <span id="poTicker">{{positionInfo.symbol}}</span></p>
+                <p>Type : <span id="poType">{{positionInfo.side}}</span> <span>{{positionInfo.leverage}}X</span></p>
+                <p>size : <span id="poSize">{{positionInfo.size}}</span>($<span
+                        id="poMargin">{{positionInfo.positionBalance}}</span>)</p>
+                <p>Ent.Price : $<span id="entryPrice">{{positionInfo.avgPrice}}</span></p>
+                <p>Liq.Price : $<span id="liqPrice">{{positionInfo.liqPrice}}</span></p>
+            {{/isPositionExist}}
+            {{^isPositionExist}}
+                <p class="text-center">Coin futures position does not exist ;\</p>
+            {{/isPositionExist}}
         </div>
     </div>
 

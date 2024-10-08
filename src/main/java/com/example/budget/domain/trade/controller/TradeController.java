@@ -31,6 +31,7 @@ public class TradeController {
         PositionVo openOrder = bybitTradeService.getOpenOrder();
 
         model.addAttribute("markPrice", markPrice);
+        model.addAttribute("isPositionExist", positionInfo.isExists());
         model.addAttribute("positionInfo", positionInfo);
         model.addAttribute("balance", balance);
         model.addAttribute("openOrder", openOrder);
