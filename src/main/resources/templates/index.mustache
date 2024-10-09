@@ -76,7 +76,7 @@
         </div>
     </div>
 
-    <div class="bg-zinc-950 w-3/4 mx-auto mt-10 p-4 rounded-xl shadow-lg ">
+    <div class="bg-zinc-950 w-screen mx-auto mt-5 p-4 rounded-xl shadow-lg ">
         <div class="font-bold text-violet-400 flex items-center gap-2">
                 <span class="material-symbols-outlined">
                     list
@@ -98,8 +98,8 @@
 
             <!-- Hidden details section -->
             <div id="orderDetails" class="hidden ">
-                <div class="text-gray-300 border-2 border-gray-500 rounded-xl m-4 p-4 hover:border-violet-500">
-                    <!--price, side, qty-->
+                <div class="text-gray-300 border-2 border-gray-500 rounded-xl p-4 hover:border-violet-500">
+                    <!--position o not positioning price, side, qty-->
                     <p>Type : <span id="poType">{{openOrder.side}} 3x</span></p>
                     <p>Size : <span id="poSize">{{openOrder.size}}</span>
                         ($<span id="poMargin">{{openOrder.positionBalance}}</span>)</p>
