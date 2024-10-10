@@ -2,11 +2,9 @@ package com.example.budget.domain.trade.model;
 
 import com.example.budget.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@ToString
 @Getter
 @Table(name = "futures_order")
 @Entity
