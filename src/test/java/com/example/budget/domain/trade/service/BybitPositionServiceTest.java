@@ -20,4 +20,9 @@ class BybitPositionServiceTest extends IntegrationTest {
         assertNotEquals(PositionVo.newInstance(), result);
     }
 
+    @Test
+    @DisplayName("Get closed pnl list")
+    void getClosedPnL() {
+        assertNotEquals(null, bybitPositionService.getClosedPnL());
+    }
 }

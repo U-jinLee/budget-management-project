@@ -9,12 +9,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Slf4j
 @Component
@@ -25,6 +27,7 @@ public class BybitPositionService {
 
     /**
      * Get bybit BTCUSDT position information
+     *
      * @return Bybit position information
      */
     public PositionVo getPositionInfo() {
@@ -42,7 +45,7 @@ public class BybitPositionService {
                     .getAsJsonObject("result")
                     .getAsJsonArray("list");
 
-            if (jsonArray.size() > 0) {
+            if (!jsonArray.isEmpty()) {
                 JsonObject jsonObject = jsonArray
                         .get(0)
                         .getAsJsonObject();
@@ -67,4 +70,27 @@ public class BybitPositionService {
         return result;
     }
 
+    public BigDecimal getClosedPnL() {
+        PositionDataRequest request = PositionDataRequest.builder()
+                .category(CategoryType.LINEAR)
+                .build();
+
+        BigDecimal result = BigDecimal.ZERO;
+
+        try {
+            String json = new ObjectMapper().writeValueAsString(bybitApiPositionRestClient.getClosePnlList(request));
+            JsonArray jsonArray = new Gson().fromJson(json, JsonObject.class)
+                    .getAsJsonObject("result")
+                    .getAsJsonArray("list");
+
+            for (JsonElement jsonElement : jsonArray) {
+                result = result.add(jsonElement.getAsJsonObject().get("closedPnl").getAsBigDecimal());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result.setScale(2, RoundingMode.HALF_UP);
+    }
 }

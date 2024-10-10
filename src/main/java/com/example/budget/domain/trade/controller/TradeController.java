@@ -29,12 +29,14 @@ public class TradeController {
         BigDecimal balance = bybitAccountService.getUSDTAvailableBalance().getBalance()
                 .setScale(4, RoundingMode.HALF_UP);
         PositionVo openOrder = bybitTradeService.getOpenOrder();
+        BigDecimal sevenDaysClosedPnL = bybitPositionService.getClosedPnL();
 
         model.addAttribute("markPrice", markPrice);
         model.addAttribute("isPositionExist", positionInfo.isExists());
         model.addAttribute("positionInfo", positionInfo);
         model.addAttribute("balance", balance);
         model.addAttribute("openOrder", openOrder);
+        model.addAttribute("sevenDaysClosedPnL", sevenDaysClosedPnL);
         return "index";
     }
 }
