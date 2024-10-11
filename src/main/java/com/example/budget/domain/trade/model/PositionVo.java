@@ -35,6 +35,10 @@ public class PositionVo {
         return this.size.compareTo(number) > 0;
     }
 
+    public BigDecimal getHalfSize() {
+        return this.size.divide(BigDecimal.valueOf(2));
+    }
+
     @Builder(builderMethodName = "newOrderBuilder", builderClassName = "newOrderBuilder")
     public PositionVo(String side, BigDecimal positionBalance, BigDecimal size, BigDecimal avgPrice) {
         this.side = side;
