@@ -5,9 +5,7 @@ import com.bybit.api.client.domain.position.request.PositionDataRequest;
 import com.bybit.api.client.restApi.BybitApiPositionRestClient;
 import com.example.budget.domain.trade.model.Coin;
 import com.example.budget.domain.trade.model.PositionVo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import com.example.budget.global.util.JsonParsingUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -37,37 +35,19 @@ public class BybitPositionService {
                 .symbol(Coin.BTCUSDT.getValue())
                 .build();
 
-        PositionVo result = PositionVo.newInstance();
+        JsonObject jsonObject = JsonParsingUtil.parsingJson(bybitApiPositionRestClient.getPositionInfo(request));
 
-        try {
-            String json = new ObjectMapper().writeValueAsString(bybitApiPositionRestClient.getPositionInfo(request));
-            JsonArray jsonArray = new Gson().fromJson(json, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list");
-
-            if (!jsonArray.isEmpty()) {
-                JsonObject jsonObject = jsonArray
-                        .get(0)
-                        .getAsJsonObject();
-
-                result = new PositionVo(
-                        jsonObject.get("symbol").getAsString(),
-                        jsonObject.get("leverage").getAsString(),
-                        jsonObject.get("side").getAsString(),
-                        jsonObject.get("positionBalance").getAsBigDecimal(),
-                        jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
-                                jsonObject.get("unrealisedPnl").getAsBigDecimal(),
-                        jsonObject.get("size").getAsBigDecimal(),
-                        jsonObject.get("liqPrice").getAsString().equals("") ? BigDecimal.ZERO :
-                                jsonObject.get("liqPrice").getAsBigDecimal(),
-                        jsonObject.get("avgPrice").getAsBigDecimal());
-            }
-
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return result;
+        return new PositionVo(
+                jsonObject.get("symbol").getAsString(),
+                jsonObject.get("leverage").getAsString(),
+                jsonObject.get("side").getAsString(),
+                jsonObject.get("positionBalance").getAsBigDecimal(),
+                jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
+                        jsonObject.get("unrealisedPnl").getAsBigDecimal(),
+                jsonObject.get("size").getAsBigDecimal(),
+                jsonObject.get("liqPrice").getAsString().equals("") ? BigDecimal.ZERO :
+                        jsonObject.get("liqPrice").getAsBigDecimal(),
+                jsonObject.get("avgPrice").getAsBigDecimal());
     }
 
     public BigDecimal getClosedPnL() {
@@ -77,20 +57,13 @@ public class BybitPositionService {
 
         BigDecimal result = BigDecimal.ZERO;
 
-        try {
-            String json = new ObjectMapper().writeValueAsString(bybitApiPositionRestClient.getClosePnlList(request));
-            JsonArray jsonArray = new Gson().fromJson(json, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list");
+        JsonArray jsonArray = JsonParsingUtil.parsingJsonArray(bybitApiPositionRestClient.getClosePnlList(request));
 
-            for (JsonElement jsonElement : jsonArray) {
-                result = result.add(jsonElement.getAsJsonObject().get("closedPnl").getAsBigDecimal());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (JsonElement jsonElement : jsonArray) {
+            result = result.add(jsonElement.getAsJsonObject().get("closedPnl").getAsBigDecimal());
         }
 
         return result.setScale(2, RoundingMode.HALF_UP);
     }
+
 }
