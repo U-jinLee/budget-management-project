@@ -4,8 +4,7 @@ import com.bybit.api.client.domain.account.AccountType;
 import com.bybit.api.client.domain.account.request.AccountDataRequest;
 import com.bybit.api.client.restApi.BybitApiAccountRestClient;
 import com.example.budget.domain.trade.model.AccountInfoVo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import com.example.budget.global.util.JsonParsingUtil;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,30 +30,17 @@ public class BybitAccountService {
                 .accountType(AccountType.UNIFIED)
                 .build();
 
-        AccountInfoVo accountInfo = AccountInfoVo.newInstance();
+        JsonObject json = JsonParsingUtil.parsingToJson(bybitApiAccountRestClient.getWalletBalance(request));
 
-        try {
-            String jsonString =
-                    new ObjectMapper().writeValueAsString(bybitApiAccountRestClient.getWalletBalance(request));
+        BigDecimal balance = json
+                .getAsJsonObject()
+                .getAsJsonArray("coin")
+                .get(0)
+                .getAsJsonObject()
+                .get("availableToWithdraw")
+                .getAsBigDecimal();
 
-            BigDecimal balance = new Gson().fromJson(jsonString, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list")
-                    .get(0)
-                    .getAsJsonObject()
-                    .getAsJsonArray("coin")
-                    .get(0)
-                    .getAsJsonObject()
-                    .get("availableToWithdraw")
-                    .getAsBigDecimal();
-
-            accountInfo = new AccountInfoVo(balance);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return accountInfo;
+        return new AccountInfoVo(balance);
     }
 
 }

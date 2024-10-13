@@ -1,5 +1,6 @@
 package com.example.budget.domain.trade.model;
 
+import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,6 +57,19 @@ public class PositionVo {
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO);
+    }
+    public static PositionVo newInstanceFromJson(JsonObject jsonObject) {
+        return new PositionVo(
+                jsonObject.get("symbol").getAsString(),
+                jsonObject.get("leverage").getAsString(),
+                jsonObject.get("side").getAsString(),
+                jsonObject.get("positionBalance").getAsBigDecimal(),
+                jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
+                        jsonObject.get("unrealisedPnl").getAsBigDecimal(),
+                jsonObject.get("size").getAsBigDecimal(),
+                jsonObject.get("liqPrice").getAsString().equals("") ? BigDecimal.ZERO :
+                        jsonObject.get("liqPrice").getAsBigDecimal(),
+                jsonObject.get("avgPrice").getAsBigDecimal());
     }
 
 }

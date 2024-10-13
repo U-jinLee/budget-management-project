@@ -8,7 +8,6 @@ import com.example.budget.domain.trade.model.PositionVo;
 import com.example.budget.global.util.JsonParsingUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -35,19 +34,9 @@ public class BybitPositionService {
                 .symbol(Coin.BTCUSDT.getValue())
                 .build();
 
-        JsonObject jsonObject = JsonParsingUtil.parsingJson(bybitApiPositionRestClient.getPositionInfo(request));
-
-        return new PositionVo(
-                jsonObject.get("symbol").getAsString(),
-                jsonObject.get("leverage").getAsString(),
-                jsonObject.get("side").getAsString(),
-                jsonObject.get("positionBalance").getAsBigDecimal(),
-                jsonObject.get("unrealisedPnl").getAsString().equals("") ? BigDecimal.ZERO :
-                        jsonObject.get("unrealisedPnl").getAsBigDecimal(),
-                jsonObject.get("size").getAsBigDecimal(),
-                jsonObject.get("liqPrice").getAsString().equals("") ? BigDecimal.ZERO :
-                        jsonObject.get("liqPrice").getAsBigDecimal(),
-                jsonObject.get("avgPrice").getAsBigDecimal());
+        return PositionVo
+                .newInstanceFromJson(JsonParsingUtil
+                        .parsingToJson(bybitApiPositionRestClient.getPositionInfo(request)));
     }
 
     public BigDecimal getClosedPnL() {

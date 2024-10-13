@@ -11,7 +11,7 @@ public class JsonParsingUtil {
     private JsonParsingUtil() {
         throw new IllegalStateException("Utility class");}
 
-    public static JsonObject parsingJson(Object jsonString) {
+    public static JsonObject parsingToJson(Object jsonString) {
         JsonObject result = null;
 
         try {
