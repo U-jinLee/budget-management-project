@@ -1,29 +1,18 @@
 package com.example.budget.domain.trade.service;
 
-import com.bybit.api.client.domain.CategoryType;
-import com.bybit.api.client.domain.TradeOrderType;
 import com.bybit.api.client.domain.market.MarketInterval;
-import com.bybit.api.client.domain.position.TpslMode;
 import com.bybit.api.client.domain.trade.Side;
-import com.bybit.api.client.domain.trade.request.TradeOrderRequest;
-import com.bybit.api.client.restApi.BybitApiTradeRestClient;
-import com.bybit.api.client.service.BybitApiClientFactory;
-import com.example.budget.domain.trade.dto.*;
+import com.example.budget.domain.trade.dto.BollingerBandDto;
+import com.example.budget.domain.trade.dto.KlineDto;
+import com.example.budget.domain.trade.dto.RsiDto;
 import com.example.budget.domain.trade.exception.OrderNotFoundException;
 import com.example.budget.domain.trade.exception.PositionIsLiquidatedException;
-import com.example.budget.domain.trade.exception.SignalUnknownException;
 import com.example.budget.domain.trade.model.*;
 import com.example.budget.domain.trade.repository.DivergenceRepository;
 import com.example.budget.domain.trade.repository.FuturesOrderRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 import org.ta4j.core.num.DecimalNum;
 
 import java.math.BigDecimal;
@@ -32,20 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
-public class FuturesOrderServiceImpl implements OrderService {
+public class BybitTakeProfitServiceImpl implements TakeProfitService {
 
-    @Value("${bybit.key.test-api}")
-    private String apiKey;
-
-    @Value("${bybit.key.test-secret}")
-    private String secretKey;
-
-    private static final BigDecimal POSITION_SIZE = BigDecimal.valueOf(0.125);
-
-    private final BybitApiClientFactory bybitApiClientFactory;
     private final FuturesOrderRepository futuresOrderRepository;
     private final DivergenceRepository divergenceRepository;
     private final MarketDataService marketDataService;
@@ -55,7 +34,7 @@ public class FuturesOrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void partialDisposalTakeProfit(Signal signal) {
+    public void execute(Signal signal) {
         List<OrderStatus> orderStatuses = new ArrayList<>();
         orderStatuses.add(OrderStatus.SIGNED);
         orderStatuses.add(OrderStatus.PARTIAL_DISPOSAL);
@@ -64,6 +43,8 @@ public class FuturesOrderServiceImpl implements OrderService {
                 .orElseThrow(OrderNotFoundException::new);
 
         PositionVo positionInfo = bybitPositionService.getPositionInfo();
+        BigDecimal positionsHalfSize = positionInfo.getHalfSize();
+
         BigDecimal markPrice = marketDataService.getMarkPrice();
 
         if (isPositionLiquidated(positionInfo, futuresOrder)) {
@@ -112,22 +93,16 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.GREEN) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
 
                         futuresOrder.partialDisposeOrder();
                     }
@@ -155,21 +130,15 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.GREEN) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -198,21 +167,15 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.GREEN) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -235,21 +198,16 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.RED) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+                            bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
+
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -272,21 +230,15 @@ public class FuturesOrderServiceImpl implements OrderService {
                         if (d.getFormerSignal().equals(Signal.GREEN) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
 
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-
-                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                            bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), halfPositionSize);
+                        bybitTradeService.takeProfit(Side.SELL, markPrice.toString(), positionsHalfSize.toString());
+
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -308,21 +260,19 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.RED) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+                            bybitTradeService
+                                    .takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+
+                        bybitTradeService
+                                .takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
+
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -348,21 +298,16 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.RED) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+                            bybitTradeService
+                                    .takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -388,21 +333,17 @@ public class FuturesOrderServiceImpl implements OrderService {
                     divergence.ifPresent(d -> {
                         if (d.getFormerSignal().equals(Signal.RED) &&
                                 futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                            String halfPositionSize =
-                                    bybitPositionService
-                                            .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
 
-                            bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+                            bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
 
                             futuresOrder.partialDisposeOrder();
                         }
                     });
 
                     if (futuresOrder.getOrderStatus().equals(OrderStatus.SIGNED)) {
-                        String halfPositionSize =
-                                bybitPositionService
-                                        .getPositionInfo().getSize().divide(BigDecimal.valueOf(2)).toString();
-                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), halfPositionSize);
+
+                        bybitTradeService.takeProfit(Side.BUY, markPrice.toString(), positionsHalfSize.toString());
+
                         futuresOrder.partialDisposeOrder();
                     }
 
@@ -427,192 +368,6 @@ public class FuturesOrderServiceImpl implements OrderService {
         boolean result = false;
 
         if (futuresOrder.isPositionActive() && !positionInfo.isExists()) result = true;
-
-        return result;
-    }
-
-
-    @Override
-    @Transactional
-    public void order(Signal signal) {
-
-        if (Signal.UNKNOWN.equals(signal)) throw new SignalUnknownException();
-
-        /**
-         * If there is a position with a reservation at stake, delete the existing position and enter a new position
-         */
-        if (isOutstandingOrderExist()) {
-            bybitTradeService.cancelAllOrder();
-            futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED)
-                    .orElseThrow(OrderNotFoundException::new).cancelOrder();
-        } else {
-            futuresOrderRepository.findByOrderStatus(OrderStatus.SIGNED).ifPresent(o -> {
-                o.cancelOrder();
-                futuresOrderRepository.saveAndFlush(o);
-            });
-        }
-
-        List<KlineDto> klines =
-                this.marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
-
-        BarSeriesUtil barSeries = new BarSeriesUtil(klines);
-        BollingerBandDto bollingerBand = barSeries.bollingerBand(50, 2.1);
-        RsiDto rsi = barSeries.rsi();
-        MaDto sma = barSeries.sma(16);
-
-        RsiDto divergenceRsi = barSeries.rsi(175, 198);
-        MinAndMaxDto divergenceClosePrice = barSeries.closePrice(175, 198);
-
-        Collections.reverse(klines);
-        BigDecimal markPrice = marketDataService.getMarkPrice();
-
-        log.info("divergenceClosePrice:{}, markPrice:{}, divergence rsi max:{}, rsi:{}",
-                divergenceClosePrice.getMax(), markPrice, divergenceRsi.getMax(), rsi.getValue());
-
-        if (Signal.GREEN.equals(signal)) {
-
-            /**
-             * 1번 째 조건
-             */
-            if (sma.getValue().isLessThan(DecimalNum.valueOf(klines.get(1).getClosePrice())) &&
-                    sma.getValue().isLessThan(DecimalNum.valueOf(markPrice))) {
-
-                BigDecimal price = BigDecimal.valueOf(sma.getValue().doubleValue());
-                String stopLoss = price.multiply(BigDecimal.valueOf(0.95)).toString();
-                newOrder(Side.BUY, price.toString(), stopLoss, signal, 1);
-
-            }
-
-            /**
-             * 2번 째 조건
-             */
-            BigDecimal compareValue =
-                    BigDecimal.valueOf(sma.getValue().multipliedBy(DecimalNum.valueOf(0.95)).doubleValue());
-            BigDecimal middleBand = BigDecimal.valueOf(bollingerBand.getMiddleBand().doubleValue());
-
-            if (markPrice.compareTo(compareValue) < 0 && markPrice.compareTo(middleBand) > 0) {
-                BigDecimal price = BigDecimal.valueOf(bollingerBand.getMiddleBand().doubleValue());
-                String stopLoss = price.multiply(BigDecimal.valueOf(0.95)).toString();
-                newOrder(Side.BUY, price.toString(), stopLoss, signal, 2);
-            }
-
-        }
-
-        if (Signal.YELLOW.equals(signal)) {
-
-            if (markPrice.compareTo(BigDecimal.valueOf(bollingerBand.getLowerBand().doubleValue())) <= 0 &&
-                    rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
-                BigDecimal previousClosePrice = klines.get(1).getClosePrice();
-                String stopLoss = previousClosePrice.multiply(BigDecimal.valueOf(0.95)).toString();
-                newOrder(Side.BUY, previousClosePrice.toString(), stopLoss, signal, 1);
-            }
-
-            if (markPrice.compareTo(BigDecimal.valueOf(bollingerBand.getUpperBand().doubleValue())) >= 0 &&
-                    rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
-                BigDecimal previousClosePrice = klines.get(1).getClosePrice();
-                String stopLoss = previousClosePrice.multiply(BigDecimal.valueOf(1.05)).toString();
-                newOrder(Side.SELL, previousClosePrice.toString(), stopLoss, signal, 2);
-            }
-
-            //RSI Divergenced 시
-            if (divergenceClosePrice.getMin().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) &&
-                    divergenceRsi.getMin().isLessThanOrEqual(rsi.getValue())) {
-                BigDecimal price = marketDataService.getMarkPrice();
-                String stopLoss = price.multiply(BigDecimal.valueOf(0.95)).toString();
-                newOrder(Side.BUY, price.toString(), stopLoss, signal, 3);
-            }
-
-
-            //RSI Divergenced 시
-            if (divergenceClosePrice.getMax().isLessThanOrEqual(DecimalNum.valueOf(markPrice))
-                    && divergenceRsi.getMax().isGreaterThanOrEqual(rsi.getValue())) {
-                BigDecimal price = marketDataService.getMarkPrice();
-                String stopLoss = price.multiply(BigDecimal.valueOf(1.05)).toString();
-                newOrder(Side.SELL, price.toString(), stopLoss, signal, 4);
-            }
-
-        }
-
-        if (Signal.RED.equals(signal)) {
-            BigDecimal previousClosePrice = klines.get(1).getClosePrice();
-
-            /**
-             * 1번 째 조건
-             */
-            if (sma.getValue().isGreaterThan(DecimalNum.valueOf(previousClosePrice)) &&
-                    sma.getValue().isGreaterThan(DecimalNum.valueOf(markPrice))) {
-                BigDecimal price = BigDecimal.valueOf(sma.getValue().doubleValue());
-                String stopLoss = price.multiply(BigDecimal.valueOf(1.05)).toString();
-                newOrder(Side.SELL, price.toString(), stopLoss, signal, 1);
-            }
-
-            /**
-             * 2번 째 조건
-             */
-            BigDecimal compareValue =
-                    BigDecimal.valueOf(sma.getValue().multipliedBy(DecimalNum.valueOf(1.05)).doubleValue());
-
-            BigDecimal middleBand = BigDecimal.valueOf(bollingerBand.getMiddleBand().doubleValue());
-
-            if (markPrice.compareTo(compareValue) > 0 && markPrice.compareTo(middleBand) < 0) {
-                BigDecimal price = BigDecimal.valueOf(bollingerBand.getMiddleBand().doubleValue());
-                String stopLoss = price.multiply(BigDecimal.valueOf(1.05)).toString();
-                newOrder(Side.SELL, price.toString(), stopLoss, signal, 2);
-            }
-
-        }
-
-    }
-
-    private void newOrder(Side side, String price, String stopLoss, Signal signal, int orderNumber) {
-        BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
-
-        String orderQty = bybitAccountService.getUSDTAvailableBalance()
-                .calculateOrderQuantity(POSITION_SIZE, marketDataService.getMarkPrice()).toString();
-
-        TradeOrderRequest request = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .side(side)
-                .orderType(TradeOrderType.LIMIT)
-                .price(price)
-                .tpslMode(TpslMode.PARTIAL.getDescription())
-                .stopLoss(stopLoss)
-                .qty(orderQty)
-                .build();
-
-        log.info(tradeClient.createOrder(request).toString());
-
-        futuresOrderRepository.save(
-                FuturesOrder.builder()
-                        .orderSignal(signal)
-                        .orderNumber(orderNumber)
-                        .orderStatus(OrderStatus.SIGNED)
-                        .build());
-    }
-
-    private boolean isOutstandingOrderExist() {
-        BybitApiTradeRestClient tradeClient = bybitApiClientFactory.newTradeRestClient();
-
-        TradeOrderRequest request = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(Coin.BTCUSDT.getValue())
-                .openOnly(0)
-                .build();
-
-        boolean result = false;
-
-        try {
-            String jsonString = new ObjectMapper().writeValueAsString(tradeClient.getOpenOrders(request));
-            JsonArray jsonArray = new Gson().fromJson(jsonString, JsonObject.class)
-                    .getAsJsonObject("result")
-                    .getAsJsonArray("list");
-
-            if (jsonArray.size() != 0) result = true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         return result;
     }

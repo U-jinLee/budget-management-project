@@ -19,6 +19,7 @@ public class OrderScheduler {
 
     private final ImpulseSystem impulseSystem;
     private final DivergenceImpulseSystem divergenceImpulseSystem;
+    private final TakeProfitService takeProfitService;
     private final OrderService orderService;
     private final MarketDataService marketDataService;
     private final BybitPositionService bybitPositionService;
@@ -45,8 +46,7 @@ public class OrderScheduler {
         signal = divergenceImpulseSystem
                 .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.TAKE_PROFIT);
 
-        orderService.partialDisposalTakeProfit(signal);
-
+        takeProfitService.execute(signal);
     }
 
     /**
@@ -77,7 +77,7 @@ public class OrderScheduler {
             signal = divergenceImpulseSystem
                     .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.ORDER);
 
-            orderService.order(signal);
+            orderService.execute(signal);
         }
 
         log.info("Divergence Signal :: {}", signal);
