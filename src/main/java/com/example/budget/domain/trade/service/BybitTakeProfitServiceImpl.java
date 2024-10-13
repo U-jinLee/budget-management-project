@@ -12,7 +12,7 @@ import com.example.budget.domain.trade.repository.DivergenceRepository;
 import com.example.budget.domain.trade.repository.FuturesOrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.ta4j.core.num.DecimalNum;
 
 import java.math.BigDecimal;
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class BybitTakeProfitServiceImpl implements TakeProfitService {
 
