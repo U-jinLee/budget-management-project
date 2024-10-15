@@ -20,28 +20,38 @@ public class BybitAccountService {
     private final BybitApiAccountRestClient bybitApiAccountRestClient;
 
     /**
-     * Get my order available balance
+     * Get my order available USDT balance
      *
      * @return My order available balance
      */
     public AccountInfoVo getUSDTAvailableBalance() {
+        return new AccountInfoVo(getWalletBalance("USDT"));
+    }
 
+    /**
+     * Get my order available USDC balance
+     *
+     * @return My order available balance
+     */
+    public AccountInfoVo getUSDCAvailableBalance() {
+        return new AccountInfoVo(getWalletBalance("USDC"));
+    }
+
+    private BigDecimal getWalletBalance(String coin) {
         AccountDataRequest request = AccountDataRequest.builder()
                 .accountType(AccountType.UNIFIED)
-                .coins("USDT")
+                .coins(coin)
                 .build();
 
         JsonObject json = JsonParsingUtil.parsingToJson(bybitApiAccountRestClient.getWalletBalance(request));
 
-        BigDecimal balance = json
+        return json
                 .getAsJsonObject()
                 .getAsJsonArray("coin")
                 .get(0)
                 .getAsJsonObject()
                 .get("availableToWithdraw")
                 .getAsBigDecimal();
-
-        return new AccountInfoVo(balance);
     }
 
 }
