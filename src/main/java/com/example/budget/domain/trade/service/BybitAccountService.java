@@ -28,6 +28,7 @@ public class BybitAccountService {
 
         AccountDataRequest request = AccountDataRequest.builder()
                 .accountType(AccountType.UNIFIED)
+                .coins("USDT")
                 .build();
 
         JsonObject json = JsonParsingUtil.parsingToJson(bybitApiAccountRestClient.getWalletBalance(request));
