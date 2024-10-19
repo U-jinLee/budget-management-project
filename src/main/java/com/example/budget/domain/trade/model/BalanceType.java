@@ -1,5 +1,5 @@
 package com.example.budget.domain.trade.model;
 
-public enum WalletBalance {
+public enum BalanceType {
     WALLET_BALANCE, BALANCE;
 }
