@@ -6,8 +6,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum Coin {
-    BTCUSDT("BTCUSDT"),
-    BTCUSDC("BTCPERP");
+    BTCUSDT("BTCUSDT", "USDT"),
+    BTCUSDC("BTCPERP", "USDC");
 
     private final String value;
+    private final String coinValue;
 }
