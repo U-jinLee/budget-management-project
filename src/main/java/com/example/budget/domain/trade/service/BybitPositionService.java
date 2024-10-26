@@ -48,8 +48,10 @@ public class BybitPositionService {
 
         JsonArray jsonArray = JsonParsingUtil.parsingJsonArray(bybitApiPositionRestClient.getClosePnlList(request));
 
-        for (JsonElement jsonElement : jsonArray) {
-            result = result.add(jsonElement.getAsJsonObject().get("closedPnl").getAsBigDecimal());
+        if (!jsonArray.isEmpty()) {
+            for (JsonElement jsonElement : jsonArray) {
+                result = result.add(jsonElement.getAsJsonObject().get("closedPnl").getAsBigDecimal());
+            }
         }
 
         return result.setScale(2, RoundingMode.HALF_UP);

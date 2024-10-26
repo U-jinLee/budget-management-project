@@ -32,7 +32,7 @@ public class JsonParsingUtil {
     }
 
     public static JsonArray parsingJsonArray(Object jsonString) {
-        JsonArray result = null;
+        JsonArray result = new JsonArray();
 
         try {
             String json = new ObjectMapper().writeValueAsString(jsonString);
