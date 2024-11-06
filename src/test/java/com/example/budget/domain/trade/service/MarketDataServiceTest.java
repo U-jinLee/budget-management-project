@@ -3,10 +3,13 @@ package com.example.budget.domain.trade.service;
 import com.bybit.api.client.domain.market.MarketInterval;
 import com.example.budget.IntegrationTest;
 import com.example.budget.domain.trade.dto.KlineDto;
+import com.example.budget.domain.trade.model.BybitAttributes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +37,10 @@ class MarketDataServiceTest extends IntegrationTest {
     @Test
     @DisplayName("Get BTCUSDT mark price")
     void getMarkPrice() {
-        assertNotEquals(null, marketDataService.getMarkPrice());
+        BigDecimal markPrice = marketDataService.getMarkPrice();
+        BigDecimal stopLoss = markPrice.multiply(BigDecimal.ONE.subtract(BybitAttributes.STOP_LOSS_PERCENTAGE))
+                .setScale(2, RoundingMode.HALF_UP);
+        assertEquals(1, markPrice.compareTo(stopLoss));
+        assertNotEquals(null, markPrice);
     }
 }
