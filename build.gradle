@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.budget'
-version = '1.7.28-SNAPSHOT'
+version = '1.7.30-SNAPSHOT'
 
 java {
     sourceCompatibility = '17'

@@ -1,5 +1,6 @@
 package com.example.budget.domain.trade.model;
 
+import com.bybit.api.client.domain.trade.Side;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +30,7 @@ public class PositionVo {
     }
 
     public boolean isExists() {
-        return !size.equals(BigDecimal.ZERO);
+        return side.equals(Side.BUY.getTransactionSide()) || side.equals(Side.SELL.getTransactionSide());
     }
 
     public boolean sizeIsBiggerThan(BigDecimal number) {
