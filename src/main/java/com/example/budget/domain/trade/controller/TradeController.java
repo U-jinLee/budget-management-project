@@ -32,7 +32,6 @@ public class TradeController {
                 .setScale(4, RoundingMode.HALF_UP);
         PositionVo openOrder = bybitTradeService.getOpenOrder();
         BigDecimal sevenDaysClosedPnL = bybitPositionService.getClosedPnL();
-        BigDecimal realizedPnl = takeProfitRepository.sumRealizedPnl();
 
         model.addAttribute("markPrice", markPrice);
         model.addAttribute("isPositionExist", positionInfo.isExists());
@@ -40,7 +39,6 @@ public class TradeController {
         model.addAttribute("balance", balance);
         model.addAttribute("openOrder", openOrder);
         model.addAttribute("sevenDaysClosedPnL", sevenDaysClosedPnL);
-        model.addAttribute("realizedPnl", realizedPnl);
 
         return "index";
     }
