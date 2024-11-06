@@ -13,6 +13,7 @@ import com.example.budget.domain.trade.exception.OrderNotFoundException;
 import com.example.budget.domain.trade.exception.SignalUnknownException;
 import com.example.budget.domain.trade.model.*;
 import com.example.budget.domain.trade.repository.FuturesOrderRepository;
+import com.example.budget.global.util.StopLossCalculateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -73,22 +74,15 @@ public class BybitFuturesOrderServiceImpl implements OrderService {
         Collections.reverse(klines);
         BigDecimal markPrice = marketDataService.getMarkPrice();
 
-        String buyStopLoss = markPrice.multiply(BigDecimal.ONE.subtract(BybitAttributes.STOP_LOSS_PERCENTAGE))
-                .setScale(2, RoundingMode.HALF_UP).toString();
-
-        String sellStopLoss = markPrice.multiply(BigDecimal.ONE.add(BybitAttributes.STOP_LOSS_PERCENTAGE))
-                .setScale(2, RoundingMode.HALF_UP).toString();
-
         if (Signal.GREEN.equals(signal)) {
             /**
              * 1번 째 조건
              */
             if (sma.getValue().isLessThan(DecimalNum.valueOf(klines.get(1).getClosePrice())) &&
                     sma.getValue().isLessThan(DecimalNum.valueOf(markPrice))) {
-
                 BigDecimal price = BigDecimal.valueOf(sma.getValue().doubleValue())
                         .setScale(2, RoundingMode.HALF_UP);
-                newOrder(Side.BUY, price.toString(), buyStopLoss, signal, 1);
+                newOrder(Side.BUY, price.toString(), StopLossCalculateUtil.calculate(price, Side.BUY), signal, 1);
 
             }
 
@@ -102,7 +96,7 @@ public class BybitFuturesOrderServiceImpl implements OrderService {
             if (markPrice.compareTo(compareValue) < 0 && markPrice.compareTo(middleBand) > 0) {
                 BigDecimal price = BigDecimal.valueOf(bollingerBand.getMiddleBand().doubleValue())
                         .setScale(2, RoundingMode.HALF_UP);
-                newOrder(Side.BUY, price.toString(), buyStopLoss, signal, 2);
+                newOrder(Side.BUY, price.toString(), StopLossCalculateUtil.calculate(price, Side.BUY), signal, 2);
             }
 
         }
@@ -111,27 +105,27 @@ public class BybitFuturesOrderServiceImpl implements OrderService {
             if (markPrice.compareTo(BigDecimal.valueOf(bollingerBand.getLowerBand().doubleValue())) <= 0 &&
                     rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
                 BigDecimal previousClosePrice = klines.get(1).getClosePrice();
-                newOrder(Side.BUY, previousClosePrice.toString(), buyStopLoss, signal, 1);
+                newOrder(Side.BUY, previousClosePrice.toString(), StopLossCalculateUtil.calculate(previousClosePrice, Side.BUY), signal, 1);
             }
 
             if (markPrice.compareTo(BigDecimal.valueOf(bollingerBand.getUpperBand().doubleValue())) >= 0 &&
                     rsi.getValue().isGreaterThanOrEqual(DecimalNum.valueOf(70))) {
                 BigDecimal previousClosePrice = klines.get(1).getClosePrice();
-                newOrder(Side.SELL, previousClosePrice.toString(), sellStopLoss, signal, 2);
+                newOrder(Side.SELL, previousClosePrice.toString(), StopLossCalculateUtil.calculate(previousClosePrice, Side.SELL), signal, 2);
             }
 
             //RSI Divergenced 시
             if (divergenceClosePrice.getMin().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) &&
                     divergenceRsi.getMin().isLessThanOrEqual(rsi.getValue())) {
                 BigDecimal price = marketDataService.getMarkPrice();
-                newOrder(Side.BUY, price.toString(), buyStopLoss, signal, 3);
+                newOrder(Side.BUY, price.toString(), StopLossCalculateUtil.calculate(price, Side.BUY), signal, 3);
             }
 
             //RSI Divergenced 시
             if (divergenceClosePrice.getMax().isLessThanOrEqual(DecimalNum.valueOf(markPrice))
                     && divergenceRsi.getMax().isGreaterThanOrEqual(rsi.getValue())) {
                 BigDecimal price = marketDataService.getMarkPrice();
-                newOrder(Side.SELL, price.toString(), sellStopLoss, signal, 4);
+                newOrder(Side.SELL, price.toString(), StopLossCalculateUtil.calculate(price, Side.SELL), signal, 4);
             }
 
         }
@@ -146,7 +140,7 @@ public class BybitFuturesOrderServiceImpl implements OrderService {
                     sma.getValue().isGreaterThan(DecimalNum.valueOf(markPrice))) {
                 BigDecimal price = BigDecimal.valueOf(sma.getValue().doubleValue())
                         .setScale(2, RoundingMode.HALF_UP);
-                newOrder(Side.SELL, price.toString(), sellStopLoss, signal, 1);
+                newOrder(Side.SELL, price.toString(), StopLossCalculateUtil.calculate(price, Side.SELL), signal, 1);
             }
 
             /**
@@ -160,7 +154,7 @@ public class BybitFuturesOrderServiceImpl implements OrderService {
             if (markPrice.compareTo(compareValue) > 0 && markPrice.compareTo(middleBand) < 0) {
                 BigDecimal price = BigDecimal.valueOf(bollingerBand.getMiddleBand().doubleValue())
                         .setScale(2, RoundingMode.HALF_UP);
-                newOrder(Side.SELL, price.toString(), sellStopLoss, signal, 2);
+                newOrder(Side.SELL, price.toString(), StopLossCalculateUtil.calculate(price, Side.SELL), signal, 2);
             }
 
         }
