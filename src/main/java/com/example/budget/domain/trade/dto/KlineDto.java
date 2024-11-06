@@ -7,6 +7,9 @@ import lombok.ToString;
 import org.json.JSONArray;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Getter
 @ToString
@@ -30,6 +33,11 @@ public class KlineDto {
                 jsonArray.getBigDecimal(5),
                 jsonArray.getLong(6)
         );
+    }
+
+    public LocalDateTime getLocalDateTime() {
+        Instant instant = Instant.ofEpochMilli(this.getCloseTime());
+        return LocalDateTime.ofInstant(instant, ZoneId.of("Asia/Seoul"));
     }
 
     public static KlineDto newInstance(JsonArray jsonArray) {

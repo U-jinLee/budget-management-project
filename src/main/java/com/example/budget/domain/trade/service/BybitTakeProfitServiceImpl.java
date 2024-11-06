@@ -10,6 +10,7 @@ import com.example.budget.domain.trade.exception.PositionIsLiquidatedException;
 import com.example.budget.domain.trade.model.*;
 import com.example.budget.domain.trade.repository.DivergenceRepository;
 import com.example.budget.domain.trade.repository.FuturesOrderRepository;
+import com.example.budget.global.util.ShortSafetyPositionUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,8 @@ public class BybitTakeProfitServiceImpl implements TakeProfitService {
 
         List<KlineDto> klines =
                 marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+
+        boolean isPositiveClose = ShortSafetyPositionUtil.isPositiveClose(klines);
 
         BarSeriesUtil barSeries = new BarSeriesUtil(klines);
 
@@ -184,7 +187,8 @@ public class BybitTakeProfitServiceImpl implements TakeProfitService {
             }
             // 노란색 1-2: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
             if (futuresOrder.getOrderNumber().equals(2)) {
-                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
+                if (isPositiveClose ||
+                        positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
                         bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                         bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                         rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {
@@ -246,7 +250,8 @@ public class BybitTakeProfitServiceImpl implements TakeProfitService {
             }
             // 노란색 1-4: 포지션의 수익률 30%, 볼린저 밴드 중간선 도달, 볼린저 밴드 하단선 도달, rsi 30 이하
             if (futuresOrder.getOrderNumber().equals(4)) {
-                if (positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
+                if (isPositiveClose ||
+                        positionInfo.getRoi().compareTo(BigDecimal.valueOf(30)) >= 0 ||
                         bollingerBand.getMiddleBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                         bollingerBand.getLowerBand().isGreaterThanOrEqual(DecimalNum.valueOf(markPrice)) ||
                         rsi.getValue().isLessThanOrEqual(DecimalNum.valueOf(30))) {

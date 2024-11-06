@@ -1,4 +1,4 @@
-package com.example.budget.domain.trade.service;
+package com.example.budget.global.config;
 
 import com.bybit.api.client.restApi.BybitApiAccountRestClient;
 import com.bybit.api.client.restApi.BybitApiMarketRestClient;
@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TradingApiSiteConfig {
 
-    @Value("${bybit.key.test-api}")
+    @Value("${bybit.key.api}")
     private String bybitApiKey;
-    @Value("${bybit.key.test-secret}")
+    @Value("${bybit.key.secret}")
     private String bybitSecretKey;
     @Value("${bybit.domain}")
     private String domain;

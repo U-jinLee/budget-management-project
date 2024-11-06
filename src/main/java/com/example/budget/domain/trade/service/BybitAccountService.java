@@ -39,7 +39,7 @@ public class BybitAccountService {
 
     private BigDecimal getWalletBalance(String coin) {
         AccountDataRequest request = AccountDataRequest.builder()
-                .accountType(AccountType.UNIFIED)
+                .accountType(AccountType.CONTRACT)
                 .coins(coin)
                 .build();
 

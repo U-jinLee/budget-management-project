@@ -17,6 +17,14 @@ class MarketDataServiceTest extends IntegrationTest {
     MarketDataService marketDataService;
 
     @Test
+    @DisplayName("Get local date time compare")
+    void marketTimeCompare() {
+        List<KlineDto> result =
+                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+        assertEquals(true, result.get(0).getLocalDateTime().isBefore(result.get(199).getLocalDateTime()));
+    }
+
+    @Test
     @DisplayName("Get 200 data from bybit")
     void getFuturesMarketLines() {
         List<KlineDto> result = marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);

@@ -5,7 +5,7 @@ import com.example.budget.domain.trade.model.PositionVo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class BybitTradeServiceTest extends IntegrationTest {
     @Autowired
@@ -14,6 +14,8 @@ class BybitTradeServiceTest extends IntegrationTest {
     @Test
     void getOpenOrder() {
         PositionVo result = bybitTradeService.getOpenOrder();
+
         assertNotEquals(PositionVo.newInstance(), result);
     }
+
 }
