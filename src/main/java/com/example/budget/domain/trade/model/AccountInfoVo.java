@@ -12,9 +12,10 @@ import java.math.RoundingMode;
 @Getter
 public class AccountInfoVo {
     private BigDecimal balance;
+    private BigDecimal cumRealisedPnl;
 
     public static AccountInfoVo newInstance() {
-        return new AccountInfoVo(BigDecimal.ZERO);
+        return new AccountInfoVo(BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
     /**

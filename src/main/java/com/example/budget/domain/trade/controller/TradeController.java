@@ -1,5 +1,6 @@
 package com.example.budget.domain.trade.controller;
 
+import com.example.budget.domain.trade.model.AccountInfoVo;
 import com.example.budget.domain.trade.model.PositionVo;
 import com.example.budget.domain.trade.repository.TakeProfitRepository;
 import com.example.budget.domain.trade.service.BybitAccountService;
@@ -28,8 +29,8 @@ public class TradeController {
     public String index(Model model) {
         BigDecimal markPrice = marketDataService.getMarkPrice();
         PositionVo positionInfo = bybitPositionService.getPositionInfo();
-        BigDecimal balance = bybitAccountService.getUSDTAvailableBalance().getBalance()
-                .setScale(4, RoundingMode.HALF_UP);
+        AccountInfoVo accountInfo = bybitAccountService.getUSDTAvailableBalance();
+        BigDecimal balance = accountInfo.getBalance().setScale(4, RoundingMode.HALF_UP);
         PositionVo openOrder = bybitTradeService.getOpenOrder();
         BigDecimal sevenDaysClosedPnL = bybitPositionService.getClosedPnL();
 
@@ -39,6 +40,7 @@ public class TradeController {
         model.addAttribute("balance", balance);
         model.addAttribute("openOrder", openOrder);
         model.addAttribute("sevenDaysClosedPnL", sevenDaysClosedPnL);
+        model.addAttribute("accountInfo", accountInfo);
 
         return "index";
     }

@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ public class BybitAccountService {
      * @return My order available balance
      */
     public AccountInfoVo getUSDTAvailableBalance() {
-        return new AccountInfoVo(getWalletBalance("USDT"));
+        return getWalletBalance("USDT");
     }
 
     /**
@@ -34,10 +32,10 @@ public class BybitAccountService {
      * @return My order available balance
      */
     public AccountInfoVo getUSDCAvailableBalance() {
-        return new AccountInfoVo(getWalletBalance("USDC"));
+        return getWalletBalance("USDC");
     }
 
-    private BigDecimal getWalletBalance(String coin) {
+    private AccountInfoVo getWalletBalance(String coin) {
         AccountDataRequest request = AccountDataRequest.builder()
                 .accountType(AccountType.CONTRACT)
                 .coins(coin)
@@ -45,13 +43,14 @@ public class BybitAccountService {
 
         JsonObject json = JsonParsingUtil.parsingToJson(bybitApiAccountRestClient.getWalletBalance(request));
 
-        return json
+        JsonObject walletBalance = json
                 .getAsJsonObject()
                 .getAsJsonArray("coin")
                 .get(0)
-                .getAsJsonObject()
-                .get("availableToWithdraw")
-                .getAsBigDecimal();
+                .getAsJsonObject();
+
+        return new AccountInfoVo(walletBalance.get("availableToWithdraw").getAsBigDecimal(),
+                walletBalance.get("cumRealisedPnl").getAsBigDecimal());
     }
 
 }
