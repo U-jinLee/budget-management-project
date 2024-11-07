@@ -74,7 +74,6 @@ public class BarSeriesUtil {
         SMAIndicator ma = new SMAIndicator(this.closePrice, barCount);
 
         int currentIndex = this.series.getEndIndex();
-
         Num currentMa = null;
         Num slope = null;
         if(currentIndex > 0) {
@@ -194,6 +193,32 @@ public class BarSeriesUtil {
 
         Num rsiValue = rsi.getValue(this.series.getEndIndex());
 
+        return new RsiDto(rsiValue, maxRsiValue, minRsiValue);
+    }
+
+    public RsiDto rsi(int index) {
+        RSIIndicator rsi = new RSIIndicator(this.closePrice, 14);
+
+        int startIndex = Math.max(index - 33, 0);
+
+        List<Num> latestRsiValues = new ArrayList<>();
+        for (int i = startIndex; i <= index; i++) {
+            latestRsiValues.add(rsi.getValue(i));
+        }
+
+        Num maxRsiValue = latestRsiValues.get(0);
+        Num minRsiValue = latestRsiValues.get(0);
+
+        for (Num rsiValue : latestRsiValues) {
+            if (rsiValue.isGreaterThan(maxRsiValue)) {
+                maxRsiValue = rsiValue;
+            }
+            if (rsiValue.isLessThan(minRsiValue)) {
+                minRsiValue = rsiValue;
+            }
+        }
+
+        Num rsiValue = rsi.getValue(index);
         return new RsiDto(rsiValue, maxRsiValue, minRsiValue);
     }
 

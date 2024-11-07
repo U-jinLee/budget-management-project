@@ -46,10 +46,13 @@ public class DivergenceImpulseSystem {
 
         if (barSeries.donchianChannel().getUpper().isLessThanOrEqual(highPrice)) {
             RsiDto rsi = barSeries.rsi();
-            //todo:
-            if (rsi.getMax().isGreaterThan(rsi.getValue())) {
+            RsiDto previousRsi = barSeries.rsi(198);
+            if (rsi.getMax().isGreaterThanOrEqual(previousRsi.getValue()) &&
+                    rsi.getMax().isGreaterThan(rsi.getValue())) {
+
                 signal = Signal.YELLOW;
-                if (rsi.getValue().isGreaterThan(DecimalNum.valueOf(70.0))) signal = Signal.GREEN;
+
+                if (previousRsi.getValue().isGreaterThan(DecimalNum.valueOf(70.0))) signal = Signal.GREEN;
             }
         }
 
@@ -64,11 +67,13 @@ public class DivergenceImpulseSystem {
 
         if (barSeries.donchianChannel().getLower().isGreaterThanOrEqual(lowPrice)) {
             RsiDto rsi = barSeries.rsi();
-            //todo:
+            RsiDto previousRsi = barSeries.rsi(198);
+
             if (rsi.getMin().isLessThan(rsi.getValue())) {
                 signal = Signal.YELLOW;
-                if (rsi.getValue().isLessThan(DecimalNum.valueOf(30.0))) signal = Signal.RED;
+                if (previousRsi.getValue().isLessThan(DecimalNum.valueOf(30.0))) signal = Signal.RED;
             }
+
         }
 
         if (barSeries.rsi().getValue().isLessThan(DecimalNum.valueOf(25.0))) signal = Signal.YELLOW;
