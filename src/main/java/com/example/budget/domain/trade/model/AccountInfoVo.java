@@ -1,5 +1,7 @@
 package com.example.budget.domain.trade.model;
 
+import com.example.budget.global.model.Leverage;
+import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -11,12 +13,9 @@ import java.math.RoundingMode;
 @AllArgsConstructor
 @Getter
 public class AccountInfoVo {
+    private BigDecimal walletBalance;
     private BigDecimal balance;
     private BigDecimal cumRealisedPnl;
-
-    public static AccountInfoVo newInstance() {
-        return new AccountInfoVo(BigDecimal.ZERO, BigDecimal.ZERO);
-    }
 
     /**
      * Calculate coin's order quantity
@@ -27,7 +26,14 @@ public class AccountInfoVo {
      */
     public BigDecimal calculateOrderQuantity(BigDecimal positionSize, BigDecimal markPrice) {
         return balance.multiply(positionSize).divide(markPrice, 3, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(3));
+                .multiply(Leverage.THREE.getValue());
+    }
+
+    public static AccountInfoVo newInstance(JsonObject jsonObject) {
+        return new AccountInfoVo(
+                jsonObject.get("walletBalance").getAsBigDecimal(),
+                jsonObject.get("availableToWithdraw").getAsBigDecimal(),
+                jsonObject.get("cumRealisedPnl").getAsBigDecimal());
     }
 
 }

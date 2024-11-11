@@ -43,14 +43,13 @@ public class BybitAccountService {
 
         JsonObject json = JsonParsingUtil.parsingToJson(bybitApiAccountRestClient.getWalletBalance(request));
 
-        JsonObject walletBalance = json
+        JsonObject jsonObject = json
                 .getAsJsonObject()
                 .getAsJsonArray("coin")
                 .get(0)
                 .getAsJsonObject();
 
-        return new AccountInfoVo(walletBalance.get("availableToWithdraw").getAsBigDecimal(),
-                walletBalance.get("cumRealisedPnl").getAsBigDecimal());
+        return AccountInfoVo.newInstance(jsonObject);
     }
 
 }
