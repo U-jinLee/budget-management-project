@@ -26,27 +26,24 @@ public class OrderScheduler {
 
     @Scheduled(cron = "0 1 9,21 * * *")
     public void runAtMidnightAndNoon() {
-
-        log.info("Running partial disposal take profit");
-
-        List<KlineDto> twelveHourlyMarketLines =
-                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
-        BarSeriesUtil halfTimeBarSeries = new BarSeriesUtil(twelveHourlyMarketLines);
-
-        List<KlineDto> weekMarketLines =
-                marketDataService.getFuturesMarketLines(MarketInterval.WEEKLY, true);
-        BarSeriesUtil weekBarSeries = new BarSeriesUtil(weekMarketLines);
-
-        /**
-         * Impulse Check
-         */
-        Signal signal = impulseSystem
-                .getSignal(weekBarSeries.ema(16).getSlope(), weekBarSeries.macd().getHistogramSlope());
-
-        signal = divergenceImpulseSystem
-                .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.TAKE_PROFIT);
-
-        takeProfitService.execute(signal);
+//        List<KlineDto> twelveHourlyMarketLines =
+//                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+//        BarSeriesUtil halfTimeBarSeries = new BarSeriesUtil(twelveHourlyMarketLines);
+//
+//        List<KlineDto> weekMarketLines =
+//                marketDataService.getFuturesMarketLines(MarketInterval.WEEKLY, true);
+//        BarSeriesUtil weekBarSeries = new BarSeriesUtil(weekMarketLines);
+//
+//        /**
+//         * Impulse Check
+//         */
+//        Signal signal = impulseSystem
+//                .getSignal(weekBarSeries.ema(16).getSlope(), weekBarSeries.macd().getHistogramSlope());
+//
+//        signal = divergenceImpulseSystem
+//                .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.TAKE_PROFIT);
+//
+//        takeProfitService.execute(signal);
     }
 
     /**
@@ -54,33 +51,28 @@ public class OrderScheduler {
      */
     @Scheduled(cron = "0 */10 * * * *")
     public void runEveryTenMinutes() {
-
-        List<KlineDto> twelveHourlyMarketLines =
-                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
-        BarSeriesUtil halfTimeBarSeries = new BarSeriesUtil(twelveHourlyMarketLines);
-
-        List<KlineDto> weekMarketLines =
-                marketDataService.getFuturesMarketLines(MarketInterval.WEEKLY, true);
-        BarSeriesUtil weekBarSeries = new BarSeriesUtil(weekMarketLines);
-
-        /**
-         * Impulse Check
-         */
-        Signal signal = impulseSystem
-                .getSignal(weekBarSeries.ema(16).getSlope(), weekBarSeries.macd().getHistogramSlope());
-
-        log.info("Signal :: {}", signal);
-
-        if (!bybitPositionService.getPositionInfo().isExists()) {
-            log.info("Create order");
-
-            signal = divergenceImpulseSystem
-                    .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.ORDER);
-
-            orderService.execute(signal);
-        }
-
-        log.info("Divergence Signal :: {}", signal);
+//
+//        List<KlineDto> twelveHourlyMarketLines =
+//                marketDataService.getFuturesMarketLines(MarketInterval.TWELVE_HOURLY, true);
+//        BarSeriesUtil halfTimeBarSeries = new BarSeriesUtil(twelveHourlyMarketLines);
+//
+//        List<KlineDto> weekMarketLines =
+//                marketDataService.getFuturesMarketLines(MarketInterval.WEEKLY, true);
+//        BarSeriesUtil weekBarSeries = new BarSeriesUtil(weekMarketLines);
+//
+//        /**
+//         * Impulse Check
+//         */
+//        Signal signal = impulseSystem
+//                .getSignal(weekBarSeries.ema(16).getSlope(), weekBarSeries.macd().getHistogramSlope());
+//
+//        if (!bybitPositionService.getPositionInfo().isExists()) {
+//
+//            signal = divergenceImpulseSystem
+//                    .checkDivergence(signal, halfTimeBarSeries, twelveHourlyMarketLines, DivergenceType.ORDER);
+//
+//            orderService.execute(signal);
+//        }
 
     }
 
