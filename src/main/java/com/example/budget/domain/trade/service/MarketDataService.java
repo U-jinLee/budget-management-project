@@ -18,9 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -28,6 +26,16 @@ import java.util.List;
 public class MarketDataService {
 
     private final BybitApiMarketRestClient bybitApiMarketRestClient;
+
+    public Map<MarketInterval, List<KlineDto>> getFuturesKlineLists(MarketInterval marketInterval1,
+                                                                    MarketInterval marketInterval2) {
+        Map<MarketInterval, List<KlineDto>> result = new EnumMap<>(MarketInterval.class);
+
+        result.put(marketInterval1, getFuturesMarketLines(marketInterval1, true));
+        result.put(marketInterval2, getFuturesMarketLines(marketInterval2, true));
+
+        return result;
+    }
 
     /**
      * Get market lines from bybit api
@@ -84,4 +92,5 @@ public class MarketDataService {
 
         return markPrice;
     }
+
 }

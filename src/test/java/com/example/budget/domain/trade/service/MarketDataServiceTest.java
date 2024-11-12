@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -18,6 +19,16 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class MarketDataServiceTest extends IntegrationTest {
     @Autowired
     MarketDataService marketDataService;
+
+
+    @Test
+    @DisplayName("Market Interval에 맞는 리스트를 가져온다")
+    void getFuturesKlineLists() {
+        Map<MarketInterval, List<KlineDto>> klines =
+                this.marketDataService.getFuturesKlineLists(MarketInterval.TWELVE_HOURLY, MarketInterval.WEEKLY);
+
+        assertEquals(2, klines.size());
+    }
 
     @Test
     @DisplayName("Get local date time compare")
@@ -43,4 +54,5 @@ class MarketDataServiceTest extends IntegrationTest {
         assertEquals(1, markPrice.compareTo(stopLoss));
         assertNotEquals(null, markPrice);
     }
+
 }
