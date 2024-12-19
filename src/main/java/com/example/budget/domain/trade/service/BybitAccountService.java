@@ -37,7 +37,7 @@ public class BybitAccountService {
 
     private AccountInfoVo getWalletBalance(String coin) {
         AccountDataRequest request = AccountDataRequest.builder()
-                .accountType(AccountType.CONTRACT)
+                .accountType(AccountType.UNIFIED)
                 .coins(coin)
                 .build();
 
